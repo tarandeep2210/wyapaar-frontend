@@ -6,3 +6,8 @@
 - [x] Task: Implement responsive design principles (Mobile-First).
 - [x] Task: Configure TypeScript for strict type checking.
 - [ ] Task: Set up `uv` for dependency management and virtual environment.
+
+### Story: Implement Buyer Authentication (Clerk Integration)
+- [x] Task: Set up Clerk for authentication (sign-up, sign-in, sign-out).
+- [x] Task: Create a Clerk-powered sign-up page (`/sign-up`).
+- [ ] Task: Create a Clerk-powered sign-in page (`/sign-in`).
