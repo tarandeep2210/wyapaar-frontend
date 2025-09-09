@@ -4,4 +4,5 @@
 - [x] Task: Integrate Shadcn UI components (button, input, form, dialog, etc.).
 - [x] Task: Set up a basic layout component with header and footer.
 - [x] Task: Implement responsive design principles (Mobile-First).
-- [ ] Task: Configure TypeScript for strict type checking.
+- [x] Task: Configure TypeScript for strict type checking.
+- [ ] Task: Set up `uv` for dependency management and virtual environment.
