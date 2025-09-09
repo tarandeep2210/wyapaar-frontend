@@ -3,4 +3,5 @@
 - [x] Task: Configure Tailwind CSS for styling.
 - [x] Task: Integrate Shadcn UI components (button, input, form, dialog, etc.).
 - [x] Task: Set up a basic layout component with header and footer.
-- [ ] Task: Implement responsive design principles (Mobile-First).
+- [x] Task: Implement responsive design principles (Mobile-First).
+- [ ] Task: Configure TypeScript for strict type checking.
