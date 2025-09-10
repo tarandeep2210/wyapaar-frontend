@@ -1,9 +1,38 @@
+'use client';
+
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Search, ArrowRight, Users, Shield, Zap, Mic, Sparkles } from "lucide-react";
+import { useEffect, useState } from "react";
+import { getCategories, type Category } from "@/lib/api/categories";
 
 export default function Home() {
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  useEffect(() => {
+    const loadCategories = async () => {
+      const result = await getCategories();
+      if (!result.error) {
+        // Get top 5 categories for the home page
+        setCategories(result.categories.slice(0, 5));
+      }
+    };
+    loadCategories();
+  }, []);
+
+  // Helper function to get background color
+  const getBgColor = (index: number) => {
+    const bgColors = [
+      "bg-gradient-to-br from-slate-600 to-slate-800",
+      "bg-gradient-to-br from-amber-500 to-orange-600", 
+      "bg-gradient-to-br from-blue-600 to-indigo-700",
+      "bg-gradient-to-br from-purple-600 to-violet-700",
+      "bg-gradient-to-br from-emerald-500 to-teal-600"
+    ];
+    return bgColors[index % bgColors.length];
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
       {/* Hero Section */}
@@ -109,36 +138,52 @@ export default function Home() {
             </p>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-            <CategoryCard
-              title="Industrial Equipment"
-              bgColor="bg-gradient-to-br from-slate-600 to-slate-800"
-              imageUrl="/category-industrial.svg"
-              href="/categories/industrial"
-            />
-            <CategoryCard
-              title="Raw Materials"
-              bgColor="bg-gradient-to-br from-amber-500 to-orange-600"
-              imageUrl="/category-materials.svg"
-              href="/categories/raw-materials"
-            />
-            <CategoryCard
-              title="Electronics"
-              bgColor="bg-gradient-to-br from-blue-600 to-indigo-700"
-              imageUrl="/category-electronics.svg"
-              href="/categories/electronics"
-            />
-            <CategoryCard
-              title="Office Supplies"
-              bgColor="bg-gradient-to-br from-emerald-500 to-teal-600"
-              imageUrl="/category-office.svg"
-              href="/categories/office"
-            />
-            <CategoryCard
-              title="Chemicals"
-              bgColor="bg-gradient-to-br from-purple-600 to-violet-700"
-              imageUrl="/category-chemicals.svg"
-              href="/categories/chemicals"
-            />
+            {categories.length > 0 ? (
+              categories.map((category, index) => (
+                <CategoryCard
+                  key={category.mcat_id}
+                  title={category.mcat_name}
+                  bgColor={getBgColor(index)}
+                  imageUrl={`/category-${category.mcat_name.toLowerCase().replace(/\s+/g, '-')}.svg`}
+                  href={`/categories/${encodeURIComponent(category.mcat_id)}`}
+                  productCount={category.product_count}
+                />
+              ))
+            ) : (
+              // Fallback static categories while loading
+              <>
+                <CategoryCard
+                  title="Industrial Equipment"
+                  bgColor="bg-gradient-to-br from-slate-600 to-slate-800"
+                  imageUrl="/category-industrial.svg"
+                  href="/categories/industrial"
+                />
+                <CategoryCard
+                  title="Raw Materials"
+                  bgColor="bg-gradient-to-br from-amber-500 to-orange-600"
+                  imageUrl="/category-materials.svg"
+                  href="/categories/raw-materials"
+                />
+                <CategoryCard
+                  title="Electronics"
+                  bgColor="bg-gradient-to-br from-blue-600 to-indigo-700"
+                  imageUrl="/category-electronics.svg"
+                  href="/categories/electronics"
+                />
+                <CategoryCard
+                  title="Office Supplies"
+                  bgColor="bg-gradient-to-br from-emerald-500 to-teal-600"
+                  imageUrl="/category-office.svg"
+                  href="/categories/office"
+                />
+                <CategoryCard
+                  title="Chemicals"
+                  bgColor="bg-gradient-to-br from-purple-600 to-violet-700"
+                  imageUrl="/category-chemicals.svg"
+                  href="/categories/chemicals"
+                />
+              </>
+            )}
           </div>
         </div>
       </section>
@@ -218,12 +263,14 @@ function CategoryCard({
   title, 
   bgColor, 
   imageUrl, 
-  href 
+  href,
+  productCount 
 }: { 
   title: string; 
   bgColor: string; 
   imageUrl: string; 
-  href: string; 
+  href: string;
+  productCount?: number;
 }) {
   return (
     <Link href={href} className="group">
@@ -241,7 +288,7 @@ function CategoryCard({
             {title}
           </h3>
           <p className="text-slate-500 text-sm text-center mt-2 group-hover:text-slate-600 transition-colors">
-            Explore products
+            {productCount ? `${productCount.toLocaleString()} products` : 'Explore products'}
           </p>
         </div>
       </div>
