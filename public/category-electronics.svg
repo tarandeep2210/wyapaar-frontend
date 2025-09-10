@@ -1,0 +1,42 @@
+<svg viewBox="0 0 200 150" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2563eb;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1d4ed8;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="200" height="150" fill="url(#grad3)"/>
+  <g fill="white" opacity="0.9">
+    <!-- Circuit board -->
+    <rect x="50" y="60" width="100" height="60" rx="4" fill="none" stroke="white" stroke-width="2"/>
+    
+    <!-- Components -->
+    <rect x="60" y="70" width="15" height="8" rx="2"/>
+    <rect x="80" y="70" width="15" height="8" rx="2"/>
+    <rect x="100" y="70" width="15" height="8" rx="2"/>
+    <rect x="120" y="70" width="15" height="8" rx="2"/>
+    
+    <rect x="60" y="85" width="8" height="15" rx="2"/>
+    <rect x="75" y="85" width="8" height="15" rx="2"/>
+    <rect x="90" y="85" width="8" height="15" rx="2"/>
+    <rect x="105" y="85" width="8" height="15" rx="2"/>
+    <rect x="120" y="85" width="8" height="15" rx="2"/>
+    
+    <!-- Connection lines -->
+    <line x1="60" y1="82" x2="135" y2="82" stroke="white" stroke-width="1"/>
+    <line x1="67" y1="70" x2="67" y2="100" stroke="white" stroke-width="1"/>
+    <line x1="87" y1="70" x2="87" y2="100" stroke="white" stroke-width="1"/>
+    <line x1="107" y1="70" x2="107" y2="100" stroke="white" stroke-width="1"/>
+    <line x1="127" y1="70" x2="127" y2="100" stroke="white" stroke-width="1"/>
+    
+    <!-- Chips -->
+    <rect x="70" y="105" width="20" height="10" rx="2"/>
+    <rect x="110" y="105" width="20" height="10" rx="2"/>
+    
+    <!-- Connection dots -->
+    <circle cx="67" cy="82" r="1"/>
+    <circle cx="87" cy="82" r="1"/>
+    <circle cx="107" cy="82" r="1"/>
+    <circle cx="127" cy="82" r="1"/>
+  </g>
+</svg>
