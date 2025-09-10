@@ -4,7 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider"; // New: Import ThemeProvider
 import Header from "@/components/layout/Header"; // New: Import Header component
 import Footer from "@/components/layout/Footer"; // New: Import Footer component
-import { ClerkProvider } from '@clerk/nextjs'; // New: Import ClerkProvider
+import { ClerkProvider } from '@clerk/nextjs'; // Import ClerkProvider for client-side components
 
 // const geistSans = Geist({
 //   variable: "--font-geist-sans",
@@ -27,21 +27,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider> {/* New: Wrap the entire application with ClerkProvider */} 
-      <html lang="en" suppressHydrationWarning> {/* New: suppressHydrationWarning for ThemeProvider */} 
-        <body
-          // className={`${geistSans.variable} ${geistMono.variable} antialiased`} // Commented out font classes
-          className="min-h-screen flex flex-col"
-        >
+    <ClerkProvider>
+      <html lang="en">
+        <body className="min-h-screen flex flex-col">
           <ThemeProvider
             attribute="class"
             defaultTheme="system"
             enableSystem
             disableTransitionOnChange
           >
-            <Header /> {/* New: Render Header component */}
-            <main className="flex-grow">{children}</main> {/* Modified: Added main tag with flex-grow */}
-            <Footer /> {/* New: Render Footer component */}
+            <Header />
+            <main className="flex-grow">{children}</main>
+            <Footer />
           </ThemeProvider>
         </body>
       </html>
