@@ -4,7 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Sparkles, Filter, MapPin, Star, Mic, Loader2, Package } from "lucide-react";
 import { useState, useEffect } from "react";
-import { searchProducts, getCategories, type Product, type Category } from "@/lib/api/categories";
+import { searchProducts, getCategories, type Category } from "@/lib/api/categories";
+import { type Product } from "@/lib/supabase";
 
 export default function SearchPage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -102,7 +103,7 @@ export default function SearchPage() {
               AI-Powered <span className="bg-gradient-to-r from-indigo-600 to-cyan-600 bg-clip-text text-transparent">Search</span>
             </h1>
             <p className="text-xl text-slate-600 max-w-2xl mx-auto">
-              Find exactly what you're looking for with our intelligent search technology
+              Find exactly what you&apos;re looking for with our intelligent search technology
             </p>
           </div>
 
@@ -162,9 +163,24 @@ export default function SearchPage() {
             {["Industrial pumps", "Steel suppliers", "Electronics components", "Chemical raw materials"].map((suggestion, index) => (
               <button
                 key={index}
-                onClick={() => {
+                onClick={async () => {
                   setSearchQuery(suggestion);
-                  handleSearch(new Event('submit') as any);
+                  // Trigger search directly
+                  setCurrentPage(1);
+                  const result = await searchProducts(suggestion, { 
+                    page: 1, 
+                    limit: 12, 
+                    category: selectedCategory 
+                  });
+                  
+                  if (result.error) {
+                    setError(result.error);
+                    setProducts([]);
+                  } else {
+                    setProducts(result.products);
+                    setTotal(result.total);
+                    setError(null);
+                  }
                 }}
                 className="text-sm bg-white/50 hover:bg-white border border-slate-200 hover:border-indigo-300 px-3 py-1 rounded-full text-slate-600 hover:text-indigo-600 transition-all duration-200 hover:shadow-sm"
               >

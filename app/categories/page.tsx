@@ -29,7 +29,7 @@ export default function CategoriesPage() {
         if (!trendingResult.error) {
           setTrendingCategories(trendingResult.categories);
         }
-      } catch (err) {
+      } catch {
         setError('Failed to load categories');
       } finally {
         setLoading(false);
@@ -137,7 +137,7 @@ function CategoryCard({
   const bgColor = bgColors[index % bgColors.length];
 
   // Use category images if available, otherwise use a default pattern
-  const imageUrl = `/category-${category.mcat_name.toLowerCase().replace(/\s+/g, '-')}.svg`;
+  // const imageUrl = `/category-${category.mcat_name.toLowerCase().replace(/\s+/g, '-')}.svg`; // Unused variable
   
   return (
     <Link href={`/categories/${encodeURIComponent(category.mcat_id)}`} className="group">

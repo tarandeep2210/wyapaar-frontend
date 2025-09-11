@@ -10,20 +10,20 @@ import {
   Star, 
   Shield, 
   Award, 
-  Calendar,
+  // Calendar, // Unused import
   Package,
   ArrowLeft,
   ExternalLink,
   Mail,
-  Users,
+  // Users, // Unused import
   TrendingUp,
   Loader2
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import Link from "next/link";
+// import Link from "next/link"; // Unused import
 import { getSupplierById, type SupplierWithProducts } from "@/lib/api/suppliers";
-import { type Product } from "@/lib/api/categories";
+import { type Product } from "@/lib/supabase";
 
 export default function SupplierProfilePage() {
   const params = useParams();
@@ -295,7 +295,7 @@ function ProductsTab({ products }: { products: Product[] }) {
       <div className="text-center py-12">
         <Package className="h-16 w-16 text-slate-300 mx-auto mb-4" />
         <h3 className="text-xl font-semibold text-slate-600 mb-2">No products listed</h3>
-        <p className="text-slate-500">This supplier hasn't listed any products yet.</p>
+        <p className="text-slate-500">This supplier hasn&apos;t listed any products yet.</p>
       </div>
     );
   }

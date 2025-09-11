@@ -3,10 +3,11 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Filter, Star, MapPin, Building, Package, ArrowLeft, Loader2, ShoppingCart } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
-import Link from "next/link";
-import { getProductsByCategory, searchProducts, type Product } from "@/lib/api/categories";
+// import Link from "next/link"; // Unused import
+import { getProductsByCategory, searchProducts } from "@/lib/api/categories";
+import { type Product } from "@/lib/supabase";
 
 export default function CategoryDetailPage() {
   const params = useParams();
@@ -21,9 +22,9 @@ export default function CategoryDetailPage() {
   const [total, setTotal] = useState(0);
   const [categoryName, setCategoryName] = useState('');
   const [sortBy, setSortBy] = useState('created_at');
-  const [priceFilter, setPriceFilter] = useState('');
+  // const [priceFilter, setPriceFilter] = useState(''); // Unused state
 
-  const loadProducts = async (page = 1, search = '') => {
+  const loadProducts = useCallback(async (page = 1, search = '') => {
     setLoading(true);
     try {
       let result;
@@ -48,17 +49,17 @@ export default function CategoryDetailPage() {
           setCategoryName(result.products[0].mcat_name);
         }
       }
-    } catch (err) {
+    } catch {
       setError('Failed to load products');
       setProducts([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, [categoryId]);
 
   useEffect(() => {
     loadProducts(currentPage, searchQuery);
-  }, [categoryId, currentPage]);
+  }, [categoryId, currentPage, searchQuery, loadProducts]);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
