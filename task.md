@@ -10,4 +10,5 @@
 ### Story: Implement Buyer Authentication (Clerk Integration)
 - [x] Task: Set up Clerk for authentication (sign-up, sign-in, sign-out).
 - [x] Task: Create a Clerk-powered sign-up page (`/sign-up`).
-- [ ] Task: Create a Clerk-powered sign-in page (`/sign-in`).
+- [x] Task: Create a Clerk-powered sign-in page (`/sign-in`).
+- [x] Task: Match UI of Sign In and Get Started pages with overall theme.
