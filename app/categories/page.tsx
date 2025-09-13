@@ -38,7 +38,7 @@ export default function CategoriesPage() {
 
     loadData();
   }, []);
-
+//T
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white flex items-center justify-center">
