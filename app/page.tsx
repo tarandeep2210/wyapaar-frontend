@@ -261,7 +261,7 @@ export default function Home() {
 
 function CategoryCard({ 
   title, 
-  bgColor, 
+  // bgColor, // Unused parameter, removed to avoid warning
   imageUrl, 
   href,
   productCount 
