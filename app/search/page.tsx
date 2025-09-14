@@ -167,7 +167,7 @@ export default function SearchPage() {
                 key={index}
                 onClick={async () => {
                   setSearchQuery(suggestion);
-                  handleSearch(new Event('submit') as any);
+                  handleSearch({ preventDefault: () => {} } as React.FormEvent);
                 }}
                 className="text-sm bg-white/50 hover:bg-white border border-slate-200 hover:border-indigo-300 px-3 py-1 rounded-full text-slate-600 hover:text-indigo-600 transition-all duration-200 hover:shadow-sm"
               >

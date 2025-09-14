@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -41,13 +41,7 @@ export default function ProductDetailsPage() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isFavorited, setIsFavorited] = useState(false);
 
-  useEffect(() => {
-    if (productId) {
-      fetchProductDetails();
-    }
-  }, [productId]);
-
-  const fetchProductDetails = async () => {
+  const fetchProductDetails = useCallback(async () => {
     try {
       setLoading(true);
       
@@ -86,7 +80,13 @@ export default function ProductDetailsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [productId]);
+
+  useEffect(() => {
+    if (productId) {
+      fetchProductDetails();
+    }
+  }, [productId, fetchProductDetails]);
 
   const handlePreviousImage = () => {
     if (product && product.images.length > 0) {
@@ -272,41 +272,41 @@ export default function ProductDetailsPage() {
                 
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <h4 className="font-semibold text-slate-800">{stripHtmlTags(product.supplier.name)}</h4>
-                    {product.supplier.score && (
+                    <h4 className="font-semibold text-slate-800">{stripHtmlTags(product.supplier?.name || '')}</h4>
+                    {product.supplier?.score && (
                       <div className="flex items-center gap-1">
                         <div className="flex">
                           {Array.from({ length: 5 }, (_, i) => (
                             <Star 
                               key={i} 
                               className={`h-4 w-4 ${
-                                i < product.supplier.score ? 'text-yellow-400 fill-current' : 'text-slate-300'
+                                i < (product.supplier?.score || 0) ? 'text-yellow-400 fill-current' : 'text-slate-300'
                               }`} 
                             />
                           ))}
                         </div>
                         <span className="text-sm text-slate-600 ml-1">
-                          ({product.supplier.score?.toFixed(1)})
+                          ({product.supplier?.score?.toFixed(1)})
                         </span>
                       </div>
                     )}
                   </div>
 
-                  {product.supplier.address && (
+                  {product.supplier?.address && (
                     <div className="flex items-center gap-2 text-slate-600">
                       <MapPin className="h-4 w-4" />
                       <span>{stripHtmlTags(product.supplier.address)}</span>
                     </div>
                   )}
 
-                  {product.supplier.phone_number && (
+                  {product.supplier?.phone_number && (
                     <div className="flex items-center gap-2 text-slate-600">
                       <Phone className="h-4 w-4" />
                       <span>{stripHtmlTags(product.supplier.phone_number)}</span>
                     </div>
                   )}
 
-                  {product.supplier.website_url && (
+                  {product.supplier?.website_url && (
                     <div className="flex items-center gap-2 text-slate-600">
                       <Globe className="h-4 w-4" />
                       <a 
@@ -320,7 +320,7 @@ export default function ProductDetailsPage() {
                     </div>
                   )}
 
-                  {product.supplier.response_rate && (
+                  {product.supplier?.response_rate && (
                     <div className="flex items-center gap-2 text-slate-600">
                       <MessageCircle className="h-4 w-4" />
                       <span>{product.supplier.response_rate}% Response Rate</span>
