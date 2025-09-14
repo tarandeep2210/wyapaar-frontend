@@ -21,6 +21,7 @@ import {
   Loader2
 } from "lucide-react";
 import { supabase, type Product, type ProductImage, type ProductSpecification } from "@/lib/supabase";
+import { getProductById, getProductImages, getProductSpecifications } from "@/lib/api/categories";
 import Link from 'next/link';
 import { stripHtmlTags } from "@/lib/utils/text";
 
@@ -50,46 +51,33 @@ export default function ProductDetailsPage() {
     try {
       setLoading(true);
       
-      // Fetch product with supplier details
-      const { data: productData, error: productError } = await supabase
-        .from('products')
-        .select(`
-          *,
-          supplier:suppliers(*)
-        `)
-        .eq('id', productId)
-        .single();
-
-      if (productError) {
-        console.error('Error fetching product:', productError);
+      // Fetch product details using the API function
+      const productResult = await getProductById(productId);
+      
+      if (productResult.error) {
+        console.error('Error fetching product:', productResult.error);
         setError('Product not found');
         return;
       }
 
-      // Fetch product images
-      const { data: imagesData, error: imagesError } = await supabase
-        .from('product_images')
-        .select('*')
-        .eq('product_id', productId);
-
-      // Fetch product specifications
-      const { data: specificationsData, error: specificationsError } = await supabase
-        .from('product_specifications')
-        .select('*')
-        .eq('product_id', productId);
-
-      if (imagesError) {
-        console.error('Error fetching images:', imagesError);
+      // Fetch product images using the API function
+      const imagesResult = await getProductImages(productId);
+      
+      if (imagesResult.error) {
+        console.error('Error fetching images:', imagesResult.error);
       }
 
-      if (specificationsError) {
-        console.error('Error fetching specifications:', specificationsError);
+      // Fetch product specifications using the API function
+      const specificationsResult = await getProductSpecifications(productId);
+      
+      if (specificationsResult.error) {
+        console.error('Error fetching specifications:', specificationsResult.error);
       }
 
       setProduct({
-        ...productData,
-        images: imagesData || [],
-        specifications: specificationsData || []
+        ...productResult.product,
+        images: imagesResult.images || [],
+        specifications: specificationsResult.specifications || []
       });
 
     } catch (err) {

@@ -46,13 +46,15 @@ export async function getSuppliers({
   limit = 12,
   search = '',
   location = '',
-  industry = ''
+  industry = '',
+  sortBy = 'best_match'
 }: {
   page?: number
   limit?: number
   search?: string
   location?: string
   industry?: string
+  sortBy?: 'best_match' | 'rating' | 'response_rate' | 'newest' | 'product_count'
 } = {}) {
   try {
     let query = supabase

@@ -19,7 +19,7 @@ export default function SuppliersPage() {
   const [connectionTested, setConnectionTested] = useState(false);
   const [sortBy, setSortBy] = useState<'best_match' | 'rating' | 'response_rate' | 'newest' | 'product_count'>('best_match');
 
-  const loadSuppliers = async (page = 1, search = '') => {
+  const loadSuppliers = useCallback(async (page = 1, search = '', sort = sortBy) => {
     setLoading(true);
     const result = await getSuppliers({ page, limit: 12, search, sortBy: sort });
     if (result.error) {
@@ -41,7 +41,7 @@ export default function SuppliersPage() {
       }
     }
     setLoading(false);
-  }, [connectionTested]);
+  }, [connectionTested, sortBy]);
 
   const loadStats = useCallback(async () => {
     const result = await getSupplierStats();

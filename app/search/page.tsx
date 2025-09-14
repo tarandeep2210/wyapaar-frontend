@@ -4,7 +4,10 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Sparkles, Filter, MapPin, Star, Mic, Loader2, Package } from "lucide-react";
 import { useState, useEffect } from "react";
-import { searchProducts, getCategories, type Product, type Category } from "@/lib/api/categories";
+import Link from "next/link";
+import { searchProducts, getCategories } from "@/lib/api/categories";
+import { type Product, type Category } from "@/lib/supabase";
+import { stripHtmlTags } from "@/lib/utils/text";
 
 export default function SearchPage() {
   const [searchQuery, setSearchQuery] = useState('');

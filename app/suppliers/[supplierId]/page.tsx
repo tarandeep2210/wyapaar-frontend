@@ -21,9 +21,10 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-// import Link from "next/link"; // Unused import
+import Link from "next/link";
 import { getSupplierById, type SupplierWithProducts } from "@/lib/api/suppliers";
-import { type Product } from "@/lib/api/categories";
+import { type Product } from "@/lib/supabase";
+import { stripHtmlTags } from "@/lib/utils/text";
 
 export default function SupplierProfilePage() {
   const params = useParams();
@@ -330,12 +331,20 @@ function AboutTab({ supplier }: { supplier: SupplierWithProducts }) {
           <div className="bg-white rounded-xl shadow-lg p-6 border border-slate-200">
             <h3 className="text-lg font-semibold text-slate-900 mb-4">About the Company</h3>
             <div className="space-y-4">
-              {supplier.about.map((aboutItem) => (
-                <div key={aboutItem.id}>
-                  <h4 className="font-medium text-slate-700 mb-2">{stripHtmlTags(aboutItem.title || '')}</h4>
-                  <p className="text-slate-600 leading-relaxed">{stripHtmlTags(aboutItem.data || '')}</p>
-                </div>
-              ))}
+              {supplier.about
+                .filter((aboutItem, index, array) => {
+                  // Remove duplicates based on title (case-insensitive)
+                  const normalizedTitle = stripHtmlTags(aboutItem.title || '').toLowerCase().trim();
+                  return array.findIndex(item => 
+                    stripHtmlTags(item.title || '').toLowerCase().trim() === normalizedTitle
+                  ) === index;
+                })
+                .map((aboutItem) => (
+                  <div key={aboutItem.id}>
+                    <h4 className="font-medium text-slate-700 mb-2">{stripHtmlTags(aboutItem.title || '')}</h4>
+                    <p className="text-slate-600 leading-relaxed">{stripHtmlTags(aboutItem.data || '')}</p>
+                  </div>
+                ))}
             </div>
           </div>
         </div>

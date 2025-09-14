@@ -6,7 +6,9 @@ import { Search, Filter, Star, MapPin, Building, Package, ArrowLeft, Loader2, Sh
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { getProductsByCategory, searchProducts, type Product } from "@/lib/api/categories";
+import { getProductsByCategory, searchProducts } from "@/lib/api/categories";
+import { type Product } from "@/lib/supabase";
+import { stripHtmlTags } from "@/lib/utils/text";
 
 export default function CategoryDetailPage() {
   const params = useParams();
