@@ -3,15 +3,29 @@
 import React from 'react';
 import Link from 'next/link';
 import { UserButton, useAuth } from '@clerk/nextjs';
-import { Search, Menu, X, Sparkles } from 'lucide-react';
+import { Search, Menu, X, Sparkles, ChevronDown, User } from 'lucide-react';
 
 const Header = () => {
   const { userId } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+  const [isUserDropdownOpen, setIsUserDropdownOpen] = React.useState(false);
+  const dropdownRef = React.useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsUserDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   return (
-    <header className="bg-white/95 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4">
+    <header className="bg-white/98 backdrop-blur-lg border-b border-slate-200/60 sticky top-0 z-50 shadow-sm">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3 group">
@@ -60,19 +74,34 @@ const Header = () => {
                 />
               </div>
             ) : (
-              <div className="flex items-center space-x-3">
-                <Link 
-                  href="/sign-in" 
-                  className="text-slate-600 hover:text-indigo-600 font-semibold transition-colors px-4 py-2"
+              <div className="relative" ref={dropdownRef}>
+                <button 
+                  className="flex items-center gap-2 text-slate-600 hover:text-indigo-600 font-semibold transition-colors px-4 py-2 rounded-lg hover:bg-slate-50"
+                  onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
                 >
-                  Sign In
-                </Link>
-                <Link 
-                  href="/sign-up" 
-                  className="bg-gradient-to-r from-indigo-600 to-cyan-600 text-white px-6 py-2.5 rounded-xl hover:from-indigo-700 hover:to-cyan-700 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl"
-                >
-                  Get Started
-                </Link>
+                  <User className="w-4 h-4" />
+                  <span>Account</span>
+                  <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isUserDropdownOpen ? 'rotate-180' : ''}`} />
+                </button>
+                
+                {isUserDropdownOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-200 py-2 z-50">
+                    <Link 
+                      href="/sign-in" 
+                      className="block px-4 py-3 text-slate-600 hover:text-indigo-600 hover:bg-slate-50 transition-colors font-medium"
+                      onClick={() => setIsUserDropdownOpen(false)}
+                    >
+                      Sign In
+                    </Link>
+                    <Link 
+                      href="/sign-up" 
+                      className="block px-4 py-3 text-slate-600 hover:text-indigo-600 hover:bg-slate-50 transition-colors font-medium"
+                      onClick={() => setIsUserDropdownOpen(false)}
+                    >
+                      Get Started
+                    </Link>
+                  </div>
+                )}
               </div>
             )}
 

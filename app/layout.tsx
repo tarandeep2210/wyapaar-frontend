@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider"; // New: Import ThemeProvider
 import Header from "@/components/layout/Header"; // New: Import Header component
-import Footer from "@/components/layout/Footer"; // New: Import Footer component
 import { ClerkProvider } from '@clerk/nextjs'; // Import ClerkProvider for client-side components
 
 // const geistSans = Geist({
@@ -38,7 +37,6 @@ export default function RootLayout({
           >
             <Header />
             <main className="flex-grow">{children}</main>
-            <Footer />
           </ThemeProvider>
         </body>
       </html>
