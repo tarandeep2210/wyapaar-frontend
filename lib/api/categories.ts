@@ -205,3 +205,91 @@ export async function searchProducts(
     }
   }
 }
+
+/**
+ * Get a single product by ID with all related data
+ */
+export async function getProductById(productId: string | number) {
+  try {
+    const { data, error } = await supabase
+      .from('products')
+      .select(`
+        *,
+        supplier:suppliers(*)
+      `)
+      .eq('id', productId)
+      .single()
+
+    if (error) {
+      console.error('Error fetching product by ID:', error)
+      return { product: null, error: error.message }
+    }
+
+    return {
+      product: data,
+      error: null
+    }
+  } catch (error) {
+    console.error('Error in getProductById:', error)
+    return {
+      product: null,
+      error: 'Failed to fetch product details'
+    }
+  }
+}
+
+/**
+ * Get product images by product ID
+ */
+export async function getProductImages(productId: string | number) {
+  try {
+    const { data, error } = await supabase
+      .from('product_images')
+      .select('*')
+      .eq('product_id', productId)
+
+    if (error) {
+      console.error('Error fetching product images:', error)
+      return { images: [], error: error.message }
+    }
+
+    return {
+      images: data || [],
+      error: null
+    }
+  } catch (error) {
+    console.error('Error in getProductImages:', error)
+    return {
+      images: [],
+      error: 'Failed to fetch product images'
+    }
+  }
+}
+
+/**
+ * Get product specifications by product ID
+ */
+export async function getProductSpecifications(productId: string | number) {
+  try {
+    const { data, error } = await supabase
+      .from('product_specifications')
+      .select('*')
+      .eq('product_id', productId)
+
+    if (error) {
+      console.error('Error fetching product specifications:', error)
+      return { specifications: [], error: error.message }
+    }
+
+    return {
+      specifications: data || [],
+      error: null
+    }
+  } catch (error) {
+    console.error('Error in getProductSpecifications:', error)
+    return {
+      specifications: [],
+      error: 'Failed to fetch product specifications'
+    }
+  }
+}

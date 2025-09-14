@@ -46,13 +46,15 @@ export async function getSuppliers({
   limit = 12,
   search = '',
   location = '',
-  // industry = '' // Currently unused parameter, removed to avoid warning
+  industry = '',
+  sortBy = 'best_match'
 }: {
   page?: number
   limit?: number
   search?: string
   location?: string
-  // industry?: string // Currently unused parameter, removed to avoid warning
+  industry?: string
+  sortBy?: 'best_match' | 'rating' | 'response_rate' | 'newest' | 'product_count'
 } = {}) {
   try {
     let query = supabase
@@ -74,8 +76,28 @@ export async function getSuppliers({
     const to = from + limit - 1
     query = query.range(from, to)
 
-    // Order by created_at desc
-    query = query.order('created_at', { ascending: false })
+    // Apply sorting
+    switch (sortBy) {
+      case 'rating':
+        query = query.order('score', { ascending: false, nullsFirst: false })
+        break
+      case 'response_rate':
+        // Client-side sorting will handle this to ensure proper null handling
+        query = query.order('created_at', { ascending: false })
+        break
+      case 'newest':
+        query = query.order('created_at', { ascending: false })
+        break
+      case 'product_count':
+        // We'll sort by product count after fetching the data
+        query = query.order('created_at', { ascending: false })
+        break
+      case 'best_match':
+      default:
+        // Client-side sorting will handle this to ensure proper null handling
+        query = query.order('created_at', { ascending: false })
+        break
+    }
 
     const { data, error, count } = await query
     // data is used in the return statement below
@@ -105,8 +127,39 @@ export async function getSuppliers({
       })
     )
 
+    // Apply client-side sorting for specific cases
+    let finalSuppliers = suppliersWithCounts as SupplierWithProducts[]
+    
+    if (sortBy === 'product_count') {
+      finalSuppliers = finalSuppliers.sort((a, b) => (b.product_count || 0) - (a.product_count || 0))
+    } else if (sortBy === 'response_rate') {
+      // Client-side sorting to ensure null values are last
+      finalSuppliers = finalSuppliers.sort((a, b) => {
+        const aRate = a.response_rate ?? -1  // Treat null as -1 (worse than 0)
+        const bRate = b.response_rate ?? -1  // Treat null as -1 (worse than 0)
+        return bRate - aRate  // Descending order
+      })
+    } else if (sortBy === 'best_match') {
+      // Client-side sorting for best match to ensure proper null handling
+      finalSuppliers = finalSuppliers.sort((a, b) => {
+        const aRate = a.response_rate ?? -1
+        const bRate = b.response_rate ?? -1
+        const aScore = a.score ?? -1
+        const bScore = b.score ?? -1
+        
+        // Primary sort by response rate
+        if (bRate !== aRate) return bRate - aRate
+        
+        // Secondary sort by score
+        if (bScore !== aScore) return bScore - aScore
+        
+        // Tertiary sort by creation date (newest first)
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      })
+    }
+
     return {
-      suppliers: suppliersWithCounts as SupplierWithProducts[],
+      suppliers: finalSuppliers,
       total: count || 0,
       error: null
     }

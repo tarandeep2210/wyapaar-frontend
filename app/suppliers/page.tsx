@@ -6,6 +6,7 @@ import { Search, MapPin, Star, Shield, Award, Filter, Users, Building, Globe, Lo
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { getSuppliers, getSupplierStats, testSupabaseConnection, type SupplierWithProducts } from "@/lib/api/suppliers";
+import { stripHtmlTags } from "@/lib/utils/text";
 
 export default function SuppliersPage() {
   const [suppliers, setSuppliers] = useState<SupplierWithProducts[]>([]);
@@ -16,10 +17,11 @@ export default function SuppliersPage() {
   const [total, setTotal] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [connectionTested, setConnectionTested] = useState(false);
+  const [sortBy, setSortBy] = useState<'best_match' | 'rating' | 'response_rate' | 'newest' | 'product_count'>('best_match');
 
-  const loadSuppliers = useCallback(async (page = 1, search = '') => {
+  const loadSuppliers = useCallback(async (page = 1, search = '', sort = sortBy) => {
     setLoading(true);
-    const result = await getSuppliers({ page, limit: 12, search });
+    const result = await getSuppliers({ page, limit: 12, search, sortBy: sort });
     if (result.error) {
       // Only set error if it's not a connection issue that was already resolved
       if (!connectionTested || result.error.includes('connection') || result.error.includes('credentials')) {
@@ -39,7 +41,7 @@ export default function SuppliersPage() {
       }
     }
     setLoading(false);
-  }, [connectionTested]);
+  }, [connectionTested, sortBy]);
 
   const loadStats = useCallback(async () => {
     const result = await getSupplierStats();
@@ -76,6 +78,12 @@ export default function SuppliersPage() {
     e.preventDefault();
     setCurrentPage(1);
     await loadSuppliers(1, searchQuery);
+  };
+
+  const handleSortChange = async (newSort: typeof sortBy) => {
+    setSortBy(newSort);
+    setCurrentPage(1);
+    await loadSuppliers(1, searchQuery, newSort);
   };
 
   const handlePageChange = (newPage: number) => {
@@ -204,10 +212,16 @@ export default function SuppliersPage() {
               <p className="text-slate-600">
                 {loading ? 'Loading...' : `Showing ${suppliers.length} of ${total.toLocaleString()} suppliers`}
               </p>
-              <select className="px-4 py-2 border border-slate-300 rounded-lg">
-                <option>Sort by Relevance</option>
-                <option>Sort by Rating</option>
-                <option>Sort by Experience</option>
+              <select 
+                value={sortBy}
+                onChange={(e) => handleSortChange(e.target.value as typeof sortBy)}
+                className="px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              >
+                <option value="best_match">Best Match (Rating + Response)</option>
+                <option value="rating">Highest Rating</option>
+                <option value="response_rate">Best Response Rate</option>
+                <option value="product_count">Most Products</option>
+                <option value="newest">Newest First</option>
               </select>
             </div>
 
@@ -351,11 +365,11 @@ function SupplierCard({ supplier }: { supplier: SupplierWithProducts }) {
             <Building className="h-8 w-8 text-indigo-600" />
           </div>
           <div>
-            <h3 className="text-xl font-semibold text-slate-900 mb-2">{supplier.name}</h3>
+            <h3 className="text-xl font-semibold text-slate-900 mb-2">{stripHtmlTags(supplier.name)}</h3>
             {supplier.address && (
               <div className="flex items-center gap-2 text-slate-600 mb-2">
                 <MapPin className="h-4 w-4" />
-                <span>{supplier.address}</span>
+                <span>{stripHtmlTags(supplier.address)}</span>
               </div>
             )}
             <div className="flex items-center gap-2 mb-2">
