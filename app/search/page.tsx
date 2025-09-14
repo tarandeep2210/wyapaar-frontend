@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Search, Sparkles, Filter, MapPin, Star, Mic, Loader2, Package } from "lucide-react";
 import { useState, useEffect } from "react";
 import { searchProducts, getCategories, type Product, type Category } from "@/lib/api/categories";
+import Link from "next/link";
+import { stripHtmlTags } from "@/lib/utils/text";
 
 export default function SearchPage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -102,7 +104,7 @@ export default function SearchPage() {
               AI-Powered <span className="bg-gradient-to-r from-indigo-600 to-cyan-600 bg-clip-text text-transparent">Search</span>
             </h1>
             <p className="text-xl text-slate-600 max-w-2xl mx-auto">
-              Find exactly what you're looking for with our intelligent search technology
+              Find exactly what you&apos;re looking for with our intelligent search technology
             </p>
           </div>
 
@@ -164,7 +166,7 @@ export default function SearchPage() {
                 key={index}
                 onClick={() => {
                   setSearchQuery(suggestion);
-                  handleSearch(new Event('submit') as any);
+                  handleSearch({ preventDefault: () => {} } as React.FormEvent);
                 }}
                 className="text-sm bg-white/50 hover:bg-white border border-slate-200 hover:border-indigo-300 px-3 py-1 rounded-full text-slate-600 hover:text-indigo-600 transition-all duration-200 hover:shadow-sm"
               >
@@ -212,7 +214,7 @@ export default function SearchPage() {
                           onChange={(e) => handleCategoryFilter(e.target.value)}
                           className="text-indigo-600 mr-2" 
                         />
-                        <span className="text-slate-600 text-sm">{category.mcat_name}</span>
+                        <span className="text-slate-600 text-sm">{stripHtmlTags(category.mcat_name)}</span>
                       </label>
                     ))}
                   </div>
@@ -313,37 +315,47 @@ export default function SearchPage() {
 }
 
 function SearchResultCard({ product }: { product: Product }) {
+
   return (
     <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-slate-200">
       <div className="flex gap-6">
         {/* Product Image */}
-        <div className="w-32 h-32 flex-shrink-0">
+        <Link href={`/products/${product.id}`} className="w-32 h-32 flex-shrink-0">
           {product.main_image ? (
             <img 
               src={product.main_image} 
               alt={product.title || 'Product image'}
-              className="w-full h-full object-cover rounded-lg"
+              className="w-full h-full object-cover rounded-lg hover:opacity-80 transition-opacity cursor-pointer"
             />
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-slate-100 to-slate-200 rounded-lg flex items-center justify-center">
+            <div className="w-full h-full bg-gradient-to-br from-slate-100 to-slate-200 rounded-lg flex items-center justify-center hover:bg-gradient-to-br hover:from-slate-200 hover:to-slate-300 transition-all cursor-pointer">
               <Package className="h-8 w-8 text-slate-400" />
             </div>
           )}
-        </div>
+        </Link>
 
         {/* Product Details */}
         <div className="flex-1">
           <div className="flex justify-between items-start mb-4">
             <div>
-              <h3 className="text-xl font-semibold text-slate-900 mb-2 line-clamp-2">
-                {product.title || 'Product Title'}
-              </h3>
+              <Link href={`/products/${product.id}`}>
+                <h3 className="text-xl font-semibold text-slate-900 mb-2 line-clamp-2 hover:text-indigo-600 cursor-pointer transition-colors">
+                  {stripHtmlTags(product.title || 'Product Title')}
+                </h3>
+              </Link>
               {product.supplier && (
-                <div className="flex items-center gap-2 text-slate-600 mb-2">
-                  <MapPin className="h-4 w-4" />
-                  <span>{product.supplier.name}</span>
+                <div className="text-slate-600 mb-2 space-y-1">
+                  <div className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4 flex-shrink-0" />
+                    <span className="font-medium">{stripHtmlTags(product.supplier.name)}</span>
+                  </div>
                   {product.supplier.address && (
-                    <span className="text-slate-400">• {product.supplier.address.split(',').slice(-2).join(',')}</span>
+                    <div className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4 flex-shrink-0 opacity-50" />
+                      <span className="text-sm text-slate-500">
+                        {stripHtmlTags(product.supplier.address.split(',').slice(-2).join(',').trim())}
+                      </span>
+                    </div>
                   )}
                 </div>
               )}
@@ -375,22 +387,24 @@ function SearchResultCard({ product }: { product: Product }) {
           
           {product.description && (
             <p className="text-slate-600 mb-4 line-clamp-2">
-              {product.description}
+              {stripHtmlTags(product.description)}
             </p>
           )}
           
           <div className="flex justify-between items-center">
             <div className="flex gap-2">
               <span className="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm">
-                {product.mcat_name || 'Category'}
+                {stripHtmlTags(product.mcat_name || 'Category')}
               </span>
               {product.supplier && (
                 <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm">Verified Supplier</span>
               )}
             </div>
-            <Button className="bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-700 hover:to-cyan-700">
-              View Details
-            </Button>
+            <Link href={`/products/${product.id}`}>
+              <Button className="bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-700 hover:to-cyan-700">
+                View Details
+              </Button>
+            </Link>
           </div>
         </div>
       </div>

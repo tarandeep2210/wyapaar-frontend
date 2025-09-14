@@ -24,6 +24,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { getSupplierById, type SupplierWithProducts } from "@/lib/api/suppliers";
 import { type Product } from "@/lib/api/categories";
+import { stripHtmlTags } from "@/lib/utils/text";
 
 export default function SupplierProfilePage() {
   const params = useParams();
@@ -114,19 +115,19 @@ export default function SupplierProfilePage() {
 
                 {/* Company Details */}
                 <div className="flex-1">
-                  <h1 className="text-3xl font-bold text-slate-900 mb-2">{supplier.name}</h1>
+                  <h1 className="text-3xl font-bold text-slate-900 mb-2">{stripHtmlTags(supplier.name)}</h1>
                   
                   {supplier.address && (
                     <div className="flex items-center gap-2 text-slate-600 mb-3">
                       <MapPin className="h-5 w-5" />
-                      <span>{supplier.address}</span>
+                      <span>{stripHtmlTags(supplier.address)}</span>
                     </div>
                   )}
 
                   {supplier.phone_number && (
                     <div className="flex items-center gap-2 text-slate-600 mb-3">
                       <Phone className="h-5 w-5" />
-                      <span>{supplier.phone_number}</span>
+                      <span>{stripHtmlTags(supplier.phone_number)}</span>
                     </div>
                   )}
 
@@ -295,7 +296,7 @@ function ProductsTab({ products }: { products: Product[] }) {
       <div className="text-center py-12">
         <Package className="h-16 w-16 text-slate-300 mx-auto mb-4" />
         <h3 className="text-xl font-semibold text-slate-600 mb-2">No products listed</h3>
-        <p className="text-slate-500">This supplier hasn't listed any products yet.</p>
+        <p className="text-slate-500">This supplier hasn&apos;t listed any products yet.</p>
       </div>
     );
   }
@@ -320,7 +321,7 @@ function AboutTab({ supplier }: { supplier: SupplierWithProducts }) {
   return (
     <div>
       <div className="mb-8">
-        <h2 className="text-2xl font-bold text-slate-900 mb-2">About {supplier.name}</h2>
+        <h2 className="text-2xl font-bold text-slate-900 mb-2">About {stripHtmlTags(supplier.name)}</h2>
         <p className="text-slate-600">Learn more about this supplier and their business</p>
       </div>
 
@@ -332,8 +333,8 @@ function AboutTab({ supplier }: { supplier: SupplierWithProducts }) {
             <div className="space-y-4">
               {supplier.about.map((aboutItem) => (
                 <div key={aboutItem.id}>
-                  <h4 className="font-medium text-slate-700 mb-2">{aboutItem.title}</h4>
-                  <p className="text-slate-600 leading-relaxed">{aboutItem.data}</p>
+                  <h4 className="font-medium text-slate-700 mb-2">{stripHtmlTags(aboutItem.title || '')}</h4>
+                  <p className="text-slate-600 leading-relaxed">{stripHtmlTags(aboutItem.data || '')}</p>
                 </div>
               ))}
             </div>
@@ -349,20 +350,20 @@ function AboutTab({ supplier }: { supplier: SupplierWithProducts }) {
           <div className="space-y-4">
             <div>
               <label className="text-sm font-medium text-slate-500">Company Name</label>
-              <p className="text-slate-900 font-medium">{supplier.name}</p>
+              <p className="text-slate-900 font-medium">{stripHtmlTags(supplier.name)}</p>
             </div>
             
             {supplier.address && (
               <div>
                 <label className="text-sm font-medium text-slate-500">Address</label>
-                <p className="text-slate-900">{supplier.address}</p>
+                <p className="text-slate-900">{stripHtmlTags(supplier.address)}</p>
               </div>
             )}
             
             {supplier.phone_number && (
               <div>
                 <label className="text-sm font-medium text-slate-500">Phone</label>
-                <p className="text-slate-900">{supplier.phone_number}</p>
+                <p className="text-slate-900">{stripHtmlTags(supplier.phone_number)}</p>
               </div>
             )}
             
@@ -375,7 +376,7 @@ function AboutTab({ supplier }: { supplier: SupplierWithProducts }) {
                   rel="noopener noreferrer"
                   className="text-indigo-600 hover:text-indigo-700 flex items-center gap-1 hover:underline"
                 >
-                  {supplier.website_url}
+                  {stripHtmlTags(supplier.website_url)}
                   <ExternalLink className="h-4 w-4" />
                 </a>
               </div>
@@ -448,18 +449,20 @@ function AboutTab({ supplier }: { supplier: SupplierWithProducts }) {
 }
 
 function ProductCard({ product }: { product: Product }) {
+  const cleanDescription = product.description ? stripHtmlTags(product.description) : '';
+
   return (
     <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-slate-200 group">
       {/* Product Image */}
-      <div className="h-48 relative overflow-hidden">
+      <Link href={`/products/${product.id}`} className="h-48 relative overflow-hidden block">
         {product.main_image ? (
           <img 
             src={product.main_image} 
             alt={product.title || 'Product image'}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 cursor-pointer"
           />
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
+          <div className="w-full h-full bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center cursor-pointer">
             <Package className="h-16 w-16 text-slate-400" />
           </div>
         )}
@@ -470,36 +473,42 @@ function ProductCard({ product }: { product: Product }) {
             <span className="text-sm font-semibold text-indigo-600">{product.price_display_string}</span>
           </div>
         )}
-      </div>
+      </Link>
 
       {/* Product Info */}
       <div className="p-6">
-        <h3 className="text-lg font-semibold text-slate-900 mb-2 line-clamp-2 group-hover:text-indigo-600 transition-colors">
-          {product.title || 'Product Title'}
-        </h3>
+        <Link href={`/products/${product.id}`}>
+          <h3 className="text-lg font-semibold text-slate-900 mb-2 line-clamp-2 group-hover:text-indigo-600 hover:text-indigo-600 cursor-pointer transition-colors">
+            {stripHtmlTags(product.title || 'Product Title')}
+          </h3>
+        </Link>
         
-        {product.description && (
+        {cleanDescription && (
           <p className="text-slate-600 text-sm mb-4 line-clamp-3">
-            {product.description}
+            {cleanDescription}
           </p>
         )}
 
         {product.mcat_name && (
           <div className="mb-4">
             <Badge variant="secondary" className="text-xs">
-              {product.mcat_name}
+              {stripHtmlTags(product.mcat_name)}
             </Badge>
           </div>
         )}
 
         {/* Action Buttons */}
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" className="flex-1">
-            View Details
-          </Button>
-          <Button size="sm" className="flex-1 bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-700 hover:to-cyan-700">
-            Inquiry
-          </Button>
+          <Link href={`/products/${product.id}`} className="flex-1">
+            <Button variant="outline" size="sm" className="w-full">
+              View Details
+            </Button>
+          </Link>
+          <Link href="/rfq" className="flex-1">
+            <Button size="sm" className="w-full bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-700 hover:to-cyan-700">
+              Inquiry
+            </Button>
+          </Link>
         </div>
       </div>
     </div>

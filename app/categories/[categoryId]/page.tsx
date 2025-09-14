@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { getProductsByCategory, searchProducts, type Product } from "@/lib/api/categories";
+import { stripHtmlTags } from "@/lib/utils/text";
 
 export default function CategoryDetailPage() {
   const params = useParams();
@@ -285,18 +286,19 @@ export default function CategoryDetailPage() {
 }
 
 function ProductCard({ product }: { product: Product }) {
+
   return (
     <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-slate-200 group">
       {/* Product Image */}
-      <div className="h-48 relative overflow-hidden">
+      <Link href={`/products/${product.id}`} className="h-48 relative overflow-hidden block">
         {product.main_image ? (
           <img 
             src={product.main_image} 
             alt={product.title || 'Product image'}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 cursor-pointer"
           />
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
+          <div className="w-full h-full bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center cursor-pointer">
             <Package className="h-16 w-16 text-slate-400" />
           </div>
         )}
@@ -307,33 +309,36 @@ function ProductCard({ product }: { product: Product }) {
             <span className="text-sm font-semibold text-indigo-600">{product.price_display_string}</span>
           </div>
         )}
-      </div>
+      </Link>
 
       {/* Product Info */}
       <div className="p-6">
-        <h3 className="text-lg font-semibold text-slate-900 mb-2 line-clamp-2 group-hover:text-indigo-600 transition-colors">
-          {product.title || 'Product Title'}
-        </h3>
+        <Link href={`/products/${product.id}`}>
+          <h3 className="text-lg font-semibold text-slate-900 mb-2 line-clamp-2 group-hover:text-indigo-600 hover:text-indigo-600 cursor-pointer transition-colors">
+            {stripHtmlTags(product.title || 'Product Title')}
+          </h3>
+        </Link>
         
         {product.description && (
           <p className="text-slate-600 text-sm mb-3 line-clamp-2">
-            {product.description}
+            {stripHtmlTags(product.description)}
           </p>
         )}
 
         {/* Supplier Info */}
         {product.supplier && (
-          <div className="flex items-center gap-2 text-slate-500 text-sm mb-4">
-            <Building className="h-4 w-4" />
-            <span className="truncate">{product.supplier.name}</span>
+          <div className="text-slate-500 text-sm mb-4 space-y-1">
+            <div className="flex items-center gap-2">
+              <Building className="h-4 w-4 flex-shrink-0" />
+              <span className="font-medium text-slate-600">{stripHtmlTags(product.supplier.name)}</span>
+            </div>
             {product.supplier.address && (
-              <>
-                <span>•</span>
-                <MapPin className="h-3 w-3" />
-                <span className="truncate">
-                  {product.supplier.address.split(',').slice(-2).join(',').trim()}
+              <div className="flex items-center gap-2">
+                <MapPin className="h-4 w-4 flex-shrink-0 opacity-50" />
+                <span className="text-slate-500">
+                  {stripHtmlTags(product.supplier.address.split(',').slice(-2).join(',').trim())}
                 </span>
-              </>
+              </div>
             )}
           </div>
         )}
@@ -357,20 +362,24 @@ function ProductCard({ product }: { product: Product }) {
 
         {/* Action Buttons */}
         <div className="flex gap-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="flex-1"
-          >
-            View Details
-          </Button>
-          <Button 
-            size="sm" 
-            className="flex-1 bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-700 hover:to-cyan-700"
-          >
-            <ShoppingCart className="h-4 w-4 mr-1" />
-            Inquiry
-          </Button>
+          <Link href={`/products/${product.id}`} className="flex-1">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="w-full"
+            >
+              View Details
+            </Button>
+          </Link>
+          <Link href="/rfq" className="flex-1">
+            <Button 
+              size="sm" 
+              className="w-full bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-700 hover:to-cyan-700"
+            >
+              <ShoppingCart className="h-4 w-4 mr-1" />
+              Inquiry
+            </Button>
+          </Link>
         </div>
       </div>
     </div>
