@@ -19,10 +19,11 @@ export interface SupplierWithProducts extends Supplier {
 export async function testSupabaseConnection() {
   try {
     // Simple query to test connection - just get one record
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('suppliers')
       .select('id')
       .limit(1)
+    // data is not used, we only care about the error
 
     if (error) {
       console.error('Supabase connection test failed:', error)
@@ -45,15 +46,13 @@ export async function getSuppliers({
   limit = 12,
   search = '',
   location = '',
-  industry = '',
-  sortBy = 'best_match'
+  industry = ''
 }: {
   page?: number
   limit?: number
   search?: string
   location?: string
   industry?: string
-  sortBy?: 'best_match' | 'rating' | 'response_rate' | 'newest' | 'product_count'
 } = {}) {
   try {
     let query = supabase
@@ -99,6 +98,7 @@ export async function getSuppliers({
     }
 
     const { data, error, count } = await query
+    // data is used in the return statement below
 
     if (error) {
       console.error('Error fetching suppliers:', error)

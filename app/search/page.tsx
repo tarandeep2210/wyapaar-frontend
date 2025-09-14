@@ -5,8 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Search, Sparkles, Filter, MapPin, Star, Mic, Loader2, Package } from "lucide-react";
 import { useState, useEffect } from "react";
 import { searchProducts, getCategories, type Product, type Category } from "@/lib/api/categories";
-import Link from "next/link";
-import { stripHtmlTags } from "@/lib/utils/text";
 
 export default function SearchPage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -164,9 +162,9 @@ export default function SearchPage() {
             {["Industrial pumps", "Steel suppliers", "Electronics components", "Chemical raw materials"].map((suggestion, index) => (
               <button
                 key={index}
-                onClick={() => {
+                onClick={async () => {
                   setSearchQuery(suggestion);
-                  handleSearch({ preventDefault: () => {} } as React.FormEvent);
+                  handleSearch(new Event('submit') as any);
                 }}
                 className="text-sm bg-white/50 hover:bg-white border border-slate-200 hover:border-indigo-300 px-3 py-1 rounded-full text-slate-600 hover:text-indigo-600 transition-all duration-200 hover:shadow-sm"
               >

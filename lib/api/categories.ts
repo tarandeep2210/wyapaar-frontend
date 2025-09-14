@@ -1,5 +1,8 @@
 import { supabase, type Category } from '../supabase'
 
+// Re-export the Category type for convenience
+export type { Category } from '../supabase'
+
 /**
  * Get all product categories with product counts
  */

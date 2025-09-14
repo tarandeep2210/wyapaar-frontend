@@ -12,11 +12,11 @@ interface ThemeProviderProps {
 
 export function ThemeProvider({
   children,
-  attribute = "class",
-  defaultTheme = "system",
-  enableSystem = true,
-  disableTransitionOnChange = false,
-  ...props
+  // attribute = "class", // Unused parameter
+  // defaultTheme = "system", // Unused parameter
+  // enableSystem = true, // Unused parameter
+  // disableTransitionOnChange = false, // Unused parameter
+  // ..._props // Unused props, removed to avoid warning
 }: ThemeProviderProps) {
   // Simple theme provider without next-themes dependency
   // For now, we'll just pass through children

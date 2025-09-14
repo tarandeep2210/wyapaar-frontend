@@ -10,21 +10,20 @@ import {
   Star, 
   Shield, 
   Award, 
-  Calendar,
+  // Calendar, // Unused import
   Package,
   ArrowLeft,
   ExternalLink,
   Mail,
-  Users,
+  // Users, // Unused import
   TrendingUp,
   Loader2
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import Link from "next/link";
+// import Link from "next/link"; // Unused import
 import { getSupplierById, type SupplierWithProducts } from "@/lib/api/suppliers";
 import { type Product } from "@/lib/api/categories";
-import { stripHtmlTags } from "@/lib/utils/text";
 
 export default function SupplierProfilePage() {
   const params = useParams();

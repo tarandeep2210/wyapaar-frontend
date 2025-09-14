@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, MapPin, Star, Shield, Award, Filter, Users, Building, Globe, Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { getSuppliers, getSupplierStats, testSupabaseConnection, type SupplierWithProducts } from "@/lib/api/suppliers";
 import { stripHtmlTags } from "@/lib/utils/text";
@@ -19,7 +19,7 @@ export default function SuppliersPage() {
   const [connectionTested, setConnectionTested] = useState(false);
   const [sortBy, setSortBy] = useState<'best_match' | 'rating' | 'response_rate' | 'newest' | 'product_count'>('best_match');
 
-  const loadSuppliers = async (page = 1, search = '', sort = sortBy) => {
+  const loadSuppliers = async (page = 1, search = '') => {
     setLoading(true);
     const result = await getSuppliers({ page, limit: 12, search, sortBy: sort });
     if (result.error) {
@@ -41,14 +41,14 @@ export default function SuppliersPage() {
       }
     }
     setLoading(false);
-  };
+  }, [connectionTested]);
 
-  const loadStats = async () => {
+  const loadStats = useCallback(async () => {
     const result = await getSupplierStats();
     if (!result.error) {
       setStats(result);
     }
-  };
+  }, []);
 
   useEffect(() => {
     const initializePage = async () => {
@@ -72,7 +72,7 @@ export default function SuppliersPage() {
     };
     
     initializePage();
-  }, [currentPage, connectionTested]);
+  }, [currentPage, connectionTested, searchQuery, loadSuppliers, loadStats]);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
