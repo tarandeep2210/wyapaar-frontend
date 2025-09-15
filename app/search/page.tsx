@@ -208,7 +208,7 @@ function SearchPageContent() {
                 key={index}
                 onClick={async () => {
                   setSearchQuery(suggestion);
-                  handleSearch({ preventDefault: () => {} } as React.FormEvent);
+                  await performSearch(suggestion, 1);
                 }}
                 className="text-sm bg-white/50 hover:bg-white border border-slate-200 hover:border-indigo-300 px-3 py-1 rounded-full text-slate-600 hover:text-indigo-600 transition-all duration-200 hover:shadow-sm"
               >

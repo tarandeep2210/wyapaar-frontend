@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Filter, Star, MapPin, Building, Package, ArrowLeft, Loader2, ShoppingCart } from "lucide-react";
+import { Search, Filter, Star, MapPin, Building, Package, ArrowLeft, Loader2, ShoppingCart, ChevronDown } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
@@ -23,6 +23,7 @@ export default function CategoryDetailPage() {
   const [total, setTotal] = useState(0);
   const [categoryName, setCategoryName] = useState('');
   const [sortBy, setSortBy] = useState('created_at');
+  const [showFilters, setShowFilters] = useState(false);
   // const [priceFilter, setPriceFilter] = useState(''); // Unused state
 
   const loadProducts = useCallback(async (page = 1, search = '') => {
@@ -113,14 +114,15 @@ export default function CategoryDetailPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={`Search in ${categoryName || 'this category'}...`}
-                className="h-14 pl-12 pr-4 text-lg border-2 border-slate-200 focus:border-indigo-500 rounded-xl"
+                className="h-14 pl-12 pr-16 text-lg border-2 border-slate-200 focus:border-indigo-500 rounded-xl"
               />
               <Button 
                 type="submit" 
                 disabled={loading}
-                className="absolute right-2 top-2 h-10 bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-700 hover:to-cyan-700"
+                size="sm"
+                className="absolute right-2 top-2 h-10 w-10 bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-700 hover:to-cyan-700 p-0"
               >
-                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Search'}
+                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
               </Button>
             </div>
           </form>
@@ -128,39 +130,51 @@ export default function CategoryDetailPage() {
       </div>
 
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 py-12">
-        <div className="flex gap-8">
-          {/* Filters Sidebar */}
-          <div className="w-64 flex-shrink-0">
-            <div className="bg-white rounded-xl shadow-lg p-6 sticky top-24">
-              <div className="flex items-center gap-2 mb-6">
-                <Filter className="h-5 w-5 text-indigo-600" />
-                <h3 className="text-lg font-semibold text-slate-900">Filters</h3>
-              </div>
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Mobile Filter Button & Desktop Filters */}
+        <div className="mb-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <p className="text-slate-600 order-2 sm:order-1">
+              {loading ? 'Loading...' : `Showing ${products.length} of ${total.toLocaleString()} products`}
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto order-1 sm:order-2">
+              {/* Mobile Filter Toggle Button */}
+              <Button
+                variant="outline"
+                onClick={() => setShowFilters(!showFilters)}
+                className="flex items-center justify-center gap-2 sm:hidden w-full"
+              >
+                <Filter className="h-4 w-4" />
+                Filters
+                <ChevronDown className={`h-4 w-4 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
+              </Button>
               
-              <div className="space-y-6">
-                {/* Sort By */}
-                <div>
-                  <h4 className="font-semibold text-slate-700 mb-3">Sort By</h4>
-                  <select 
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  >
-                    <option value="created_at">Newest First</option>
-                    <option value="title">Name A-Z</option>
-                    <option value="price">Price Low to High</option>
-                  </select>
-                </div>
+              {/* Sort Dropdown */}
+              <select 
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 w-full sm:w-auto"
+              >
+                <option value="created_at">Newest First</option>
+                <option value="title">Name A-Z</option>
+                <option value="price">Price Low to High</option>
+              </select>
+            </div>
+          </div>
 
+          {/* Mobile Filter Dropdown */}
+          <div className={`sm:hidden mt-4 transition-all duration-300 ${showFilters ? 'block' : 'hidden'}`}>
+            <div className="bg-white rounded-xl shadow-lg p-4 border border-slate-200">
+              <div className="grid grid-cols-1 gap-4">
                 {/* Price Range */}
                 <div>
-                  <h4 className="font-semibold text-slate-700 mb-3">Price Range</h4>
-                  <div className="space-y-2">
+                  <h4 className="font-semibold text-slate-700 mb-2">Price Range</h4>
+                  <div className="grid grid-cols-2 gap-2">
                     {["Under ₹1,000", "₹1,000 - ₹10,000", "₹10,000 - ₹50,000", "Above ₹50,000"].map((range) => (
-                      <label key={range} className="flex items-center">
+                      <label key={range} className="flex items-center text-sm">
                         <input type="radio" name="price" className="text-indigo-600 mr-2" />
-                        <span className="text-slate-600 text-sm">{range}</span>
+                        <span className="text-slate-600">{range}</span>
                       </label>
                     ))}
                   </div>
@@ -168,12 +182,12 @@ export default function CategoryDetailPage() {
 
                 {/* Supplier Location */}
                 <div>
-                  <h4 className="font-semibold text-slate-700 mb-3">Supplier Location</h4>
-                  <div className="space-y-2">
+                  <h4 className="font-semibold text-slate-700 mb-2">Supplier Location</h4>
+                  <div className="grid grid-cols-2 gap-2">
                     {["Mumbai", "Delhi", "Bangalore", "Chennai", "Pune"].map((city) => (
-                      <label key={city} className="flex items-center">
+                      <label key={city} className="flex items-center text-sm">
                         <input type="checkbox" className="rounded border-slate-300 text-indigo-600 mr-2" />
-                        <span className="text-slate-600 text-sm">{city}</span>
+                        <span className="text-slate-600">{city}</span>
                       </label>
                     ))}
                   </div>
@@ -182,105 +196,151 @@ export default function CategoryDetailPage() {
             </div>
           </div>
 
-          {/* Products Grid */}
-          <div className="flex-1">
-            <div className="mb-6 flex justify-between items-center">
-              <p className="text-slate-600">
-                {loading ? 'Loading...' : `Showing ${products.length} of ${total.toLocaleString()} products`}
-              </p>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm">
-                  <Package className="h-4 w-4 mr-2" />
-                  Grid View
-                </Button>
+          {/* Desktop Filter Sidebar - Hidden on Mobile */}
+          <div className="hidden sm:flex gap-8 mt-8">
+            <div className="w-64 flex-shrink-0">
+              <div className="bg-white rounded-xl shadow-lg p-6 sticky top-24">
+                <div className="flex items-center gap-2 mb-6">
+                  <Filter className="h-5 w-5 text-indigo-600" />
+                  <h3 className="text-lg font-semibold text-slate-900">Filters</h3>
+                </div>
+                
+                <div className="space-y-6">
+                  {/* Price Range */}
+                  <div>
+                    <h4 className="font-semibold text-slate-700 mb-3">Price Range</h4>
+                    <div className="space-y-2">
+                      {["Under ₹1,000", "₹1,000 - ₹10,000", "₹10,000 - ₹50,000", "Above ₹50,000"].map((range) => (
+                        <label key={range} className="flex items-center">
+                          <input type="radio" name="price" className="text-indigo-600 mr-2" />
+                          <span className="text-slate-600 text-sm">{range}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Supplier Location */}
+                  <div>
+                    <h4 className="font-semibold text-slate-700 mb-3">Supplier Location</h4>
+                    <div className="space-y-2">
+                      {["Mumbai", "Delhi", "Bangalore", "Chennai", "Pune"].map((city) => (
+                        <label key={city} className="flex items-center">
+                          <input type="checkbox" className="rounded border-slate-300 text-indigo-600 mr-2" />
+                          <span className="text-slate-600 text-sm">{city}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
-            {error && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-                <p className="text-red-600">Error: {error}</p>
-                <Button 
-                  onClick={() => loadProducts(currentPage, searchQuery)} 
-                  variant="outline" 
-                  size="sm" 
-                  className="mt-2"
-                >
-                  Retry
-                </Button>
-              </div>
-            )}
-
-            {loading ? (
-              <div className="flex justify-center items-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
-                <span className="ml-2 text-slate-600">Loading products...</span>
-              </div>
-            ) : products.length === 0 ? (
-              <div className="text-center py-12">
-                <Package className="h-16 w-16 text-slate-300 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-slate-600 mb-2">No products found</h3>
-                <p className="text-slate-500">
-                  {searchQuery ? 'Try adjusting your search terms or filters' : 'No products available in this category'}
-                </p>
-                {searchQuery && (
-                  <Button 
-                    onClick={() => {
-                      setSearchQuery('');
-                      loadProducts(1, '');
-                    }}
-                    variant="outline" 
-                    className="mt-4"
-                  >
-                    Clear Search
-                  </Button>
-                )}
-              </div>
-            ) : (
+            {/* Products Grid - Desktop */}
+            <div className="flex-1">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {products.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
               </div>
-            )}
-
-            {/* Pagination */}
-            {!loading && products.length > 0 && Math.ceil(total / 12) > 1 && (
-              <div className="flex justify-center mt-12">
-                <div className="flex gap-2">
-                  <Button 
-                    variant="outline" 
-                    disabled={currentPage === 1}
-                    onClick={() => handlePageChange(currentPage - 1)}
-                  >
-                    Previous
-                  </Button>
-                  
-                  {Array.from({ length: Math.min(5, Math.ceil(total / 12)) }, (_, i) => {
-                    const page = i + 1;
-                    return (
-                      <Button
-                        key={page}
-                        variant={currentPage === page ? "default" : "outline"}
-                        className={currentPage === page ? "bg-indigo-600" : ""}
-                        onClick={() => handlePageChange(page)}
-                      >
-                        {page}
-                      </Button>
-                    );
-                  })}
-                  
-                  <Button 
-                    variant="outline"
-                    disabled={currentPage >= Math.ceil(total / 12)}
-                    onClick={() => handlePageChange(currentPage + 1)}
-                  >
-                    Next
-                  </Button>
-                </div>
-              </div>
-            )}
+            </div>
           </div>
         </div>
+
+        {/* Error Handling - Shared for both mobile and desktop */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+            <p className="text-red-600">Error: {error}</p>
+            <Button 
+              onClick={() => loadProducts(currentPage, searchQuery)} 
+              variant="outline" 
+              size="sm" 
+              className="mt-2"
+            >
+              Retry
+            </Button>
+          </div>
+        )}
+
+        {/* Loading State - Shared for both mobile and desktop */}
+        {loading ? (
+          <div className="flex justify-center items-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+            <span className="ml-2 text-slate-600">Loading products...</span>
+          </div>
+        ) : products.length === 0 ? (
+          <div className="text-center py-12">
+            <Package className="h-16 w-16 text-slate-300 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-slate-600 mb-2">No products found</h3>
+            <p className="text-slate-500">
+              {searchQuery ? 'Try adjusting your search terms or filters' : 'No products available in this category'}
+            </p>
+            {searchQuery && (
+              <Button 
+                onClick={() => {
+                  setSearchQuery('');
+                  loadProducts(1, '');
+                }}
+                variant="outline" 
+                className="mt-4"
+              >
+                Clear Search
+              </Button>
+            )}
+          </div>
+        ) : (
+          <>
+            {/* Mobile Products Grid */}
+            <div className="sm:hidden">
+              <div className="grid grid-cols-1 gap-4">
+                {products.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Pagination - Shared for both mobile and desktop */}
+        {!loading && products.length > 0 && Math.ceil(total / 12) > 1 && (
+          <div className="flex justify-center mt-8 sm:mt-12">
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                disabled={currentPage === 1}
+                onClick={() => handlePageChange(currentPage - 1)}
+                size="sm"
+                className="text-sm sm:text-base"
+              >
+                Previous
+              </Button>
+              
+              {Array.from({ length: Math.min(5, Math.ceil(total / 12)) }, (_, i) => {
+                const page = i + 1;
+                return (
+                  <Button
+                    key={page}
+                    variant={currentPage === page ? "default" : "outline"}
+                    className={`${currentPage === page ? "bg-indigo-600" : ""} text-sm sm:text-base`}
+                    onClick={() => handlePageChange(page)}
+                    size="sm"
+                  >
+                    {page}
+                  </Button>
+                );
+              })}
+              
+              <Button 
+                variant="outline"
+                disabled={currentPage >= Math.ceil(total / 12)}
+                onClick={() => handlePageChange(currentPage + 1)}
+                size="sm"
+                className="text-sm sm:text-base"
+              >
+                Next
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

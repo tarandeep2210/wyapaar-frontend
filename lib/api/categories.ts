@@ -240,6 +240,7 @@ export async function getProductById(productId: string | number) {
 
 /**
  * Get product images by product ID
+ * Note: This function gracefully handles the case where product_images table doesn't exist
  */
 export async function getProductImages(productId: string | number) {
   try {
@@ -249,6 +250,11 @@ export async function getProductImages(productId: string | number) {
       .eq('product_id', productId)
 
     if (error) {
+      // If the table doesn't exist, return empty array instead of error
+      if (error.message?.includes('table') && error.message?.includes('not found')) {
+        console.warn('Product images table not found, using main image fallback');
+        return { images: [], error: null }
+      }
       console.error('Error fetching product images:', error)
       return { images: [], error: error.message }
     }
@@ -261,13 +267,14 @@ export async function getProductImages(productId: string | number) {
     console.error('Error in getProductImages:', error)
     return {
       images: [],
-      error: 'Failed to fetch product images'
+      error: null // Return null error to allow graceful fallback
     }
   }
 }
 
 /**
  * Get product specifications by product ID
+ * Note: This function gracefully handles the case where product_specifications table doesn't exist
  */
 export async function getProductSpecifications(productId: string | number) {
   try {
@@ -277,6 +284,11 @@ export async function getProductSpecifications(productId: string | number) {
       .eq('product_id', productId)
 
     if (error) {
+      // If the table doesn't exist, return empty array instead of error
+      if (error.message?.includes('table') && error.message?.includes('not found')) {
+        console.warn('Product specifications table not found');
+        return { specifications: [], error: null }
+      }
       console.error('Error fetching product specifications:', error)
       return { specifications: [], error: error.message }
     }
@@ -289,7 +301,7 @@ export async function getProductSpecifications(productId: string | number) {
     console.error('Error in getProductSpecifications:', error)
     return {
       specifications: [],
-      error: 'Failed to fetch product specifications'
+      error: null // Return null error to allow graceful fallback
     }
   }
 }

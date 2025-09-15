@@ -3,29 +3,29 @@ import Link from "next/link";
 
 export default function Page() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 flex items-center justify-center py-12 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 flex items-center justify-center py-6 sm:py-12 px-4">
       <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))]"></div>
       <div className="relative w-full max-w-md">
         {/* Custom Header */}
-        <div className="text-center mb-8">
-          <div className="flex justify-center mb-6">
-            <div className="w-16 h-16 bg-gradient-to-r from-indigo-600 to-cyan-600 rounded-2xl flex items-center justify-center shadow-xl">
-              <span className="text-white font-bold text-2xl">W</span>
+        <div className="text-center mb-6 sm:mb-8">
+          <div className="flex justify-center mb-4 sm:mb-6">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-indigo-600 to-cyan-600 rounded-2xl flex items-center justify-center shadow-xl">
+              <span className="text-white font-bold text-xl sm:text-2xl">W</span>
             </div>
           </div>
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2 px-2">
             Welcome back to{" "}
             <span className="bg-gradient-to-r from-indigo-600 to-cyan-600 bg-clip-text text-transparent">
               Wyapaar
             </span>
           </h1>
-          <p className="text-slate-600 text-lg">
+          <p className="text-slate-600 text-base sm:text-lg px-2">
             Sign in to continue to your account
           </p>
         </div>
 
         {/* Custom styled Clerk SignIn */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-slate-200 p-8">
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-slate-200 p-4 sm:p-8">
           <SignIn 
             forceRedirectUrl="/user"
             fallbackRedirectUrl="/user"
@@ -57,8 +57,8 @@ export default function Page() {
         </div>
 
         {/* Footer */}
-        <div className="text-center mt-8">
-          <p className="text-slate-500">
+        <div className="text-center mt-6 sm:mt-8 px-2">
+          <p className="text-slate-500 text-sm sm:text-base">
             Don&apos;t have an account?{" "}
             <Link href="/sign-up" className="text-indigo-600 hover:text-indigo-700 font-semibold transition-colors">
               Get Started

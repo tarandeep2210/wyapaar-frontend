@@ -54,24 +54,36 @@ export default function ProductDetailsPage() {
         return;
       }
 
-      // Fetch product images using the API function
-      const imagesResult = await getProductImages(productId);
-      
-      if (imagesResult.error) {
-        console.error('Error fetching images:', imagesResult.error);
+      // Try to fetch product images, but handle gracefully if table doesn't exist
+      let images: ProductImage[] = [];
+      try {
+        const imagesResult = await getProductImages(productId);
+        if (!imagesResult.error) {
+          images = imagesResult.images || [];
+        } else {
+          console.warn('Product images table not available:', imagesResult.error);
+        }
+      } catch (err) {
+        console.warn('Could not fetch product images, using main image fallback:', err);
       }
 
-      // Fetch product specifications using the API function
-      const specificationsResult = await getProductSpecifications(productId);
-      
-      if (specificationsResult.error) {
-        console.error('Error fetching specifications:', specificationsResult.error);
+      // Try to fetch product specifications, but handle gracefully if table doesn't exist
+      let specifications: ProductSpecification[] = [];
+      try {
+        const specificationsResult = await getProductSpecifications(productId);
+        if (!specificationsResult.error) {
+          specifications = specificationsResult.specifications || [];
+        } else {
+          console.warn('Product specifications table not available:', specificationsResult.error);
+        }
+      } catch (err) {
+        console.warn('Could not fetch product specifications:', err);
       }
 
       setProduct({
         ...productResult.product,
-        images: imagesResult.images || [],
-        specifications: specificationsResult.specifications || []
+        images,
+        specifications
       });
 
     } catch (err) {
@@ -181,6 +193,17 @@ export default function ProductDetailsPage() {
                       src={allImages[currentImageIndex]?.full_url || allImages[currentImageIndex]?.medium_url}
                       alt={product.title || 'Product image'}
                       className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        const parent = target.parentElement;
+                        if (parent && !parent.querySelector('.default-image-placeholder')) {
+                          const placeholder = document.createElement('div');
+                          placeholder.className = 'default-image-placeholder w-full h-full bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center';
+                          placeholder.innerHTML = '<div class="text-center"><div class="w-16 h-16 mx-auto mb-4 text-slate-400"><svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"></path></svg></div><p class="text-slate-500 text-sm">Image not available</p></div>';
+                          parent.appendChild(placeholder);
+                        }
+                      }}
                     />
                     
                     {allImages.length > 1 && (
@@ -215,6 +238,17 @@ export default function ProductDetailsPage() {
                             src={image.medium_url || image.full_url}
                             alt={`Product image ${index + 1}`}
                             className="w-full h-full object-cover"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.style.display = 'none';
+                              const parent = target.parentElement;
+                              if (parent && !parent.querySelector('.thumbnail-placeholder')) {
+                                const placeholder = document.createElement('div');
+                                placeholder.className = 'thumbnail-placeholder w-full h-full bg-slate-200 flex items-center justify-center';
+                                placeholder.innerHTML = '<svg class="w-6 h-6 text-slate-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"></path></svg>';
+                                parent.appendChild(placeholder);
+                              }
+                            }}
                           />
                         </button>
                       ))}
@@ -223,7 +257,10 @@ export default function ProductDetailsPage() {
                 </>
               ) : (
                 <div className="aspect-square bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
-                  <Package className="h-24 w-24 text-slate-400" />
+                  <div className="text-center">
+                    <Package className="h-24 w-24 text-slate-400 mx-auto mb-4" />
+                    <p className="text-slate-500 text-sm">No image available</p>
+                  </div>
                 </div>
               )}
             </div>
