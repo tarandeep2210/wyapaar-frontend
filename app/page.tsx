@@ -2,8 +2,14 @@
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import Link from "next/link";
-import { Search, Mic, Sparkles } from "lucide-react";
+import { Search, Mic, Sparkles, ChevronDown } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getCategories, type Category } from "@/lib/api/categories";
@@ -17,8 +23,8 @@ export default function Home() {
     const loadCategories = async () => {
       const result = await getCategories();
       if (!result.error) {
-        // Get top 5 categories for the home page
-        setCategories(result.categories.slice(0, 5));
+        // Get all categories for the home page
+        setCategories(result.categories);
       }
     };
     loadCategories();
@@ -215,52 +221,159 @@ export default function Home() {
               Discover thousands of products across multiple industries and find the perfect suppliers for your business needs.
             </p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6">
-            {categories.length > 0 ? (
-              categories.map((category, index) => (
-                <CategoryCard
-                  key={category.mcat_id}
-                  title={category.mcat_name}
-                  bgColor={getBgColor(index)}
-                  imageUrl={`/category-${category.mcat_name.toLowerCase().replace(/\s+/g, '-')}.svg`}
-                  href={`/categories/${encodeURIComponent(category.mcat_id)}`}
-                  productCount={category.product_count}
-                />
-              ))
-            ) : (
-              // Fallback static categories while loading
-              <>
-                <CategoryCard
-                  title="Industrial Equipment"
-                  bgColor="bg-gradient-to-br from-slate-600 to-slate-800"
-                  imageUrl="/category-industrial.svg"
-                  href="/categories/industrial"
-                />
-                <CategoryCard
-                  title="Raw Materials"
-                  bgColor="bg-gradient-to-br from-amber-500 to-orange-600"
-                  imageUrl="/category-materials.svg"
-                  href="/categories/raw-materials"
-                />
-                <CategoryCard
-                  title="Electronics"
-                  bgColor="bg-gradient-to-br from-blue-600 to-indigo-700"
-                  imageUrl="/category-electronics.svg"
-                  href="/categories/electronics"
-                />
-                <CategoryCard
-                  title="Office Supplies"
-                  bgColor="bg-gradient-to-br from-emerald-500 to-teal-600"
-                  imageUrl="/category-office.svg"
-                  href="/categories/office"
-                />
-                <CategoryCard
-                  title="Chemicals"
-                  bgColor="bg-gradient-to-br from-purple-600 to-violet-700"
-                  imageUrl="/category-chemicals.svg"
-                  href="/categories/chemicals"
-                />
-              </>
+          <div className="flex flex-col items-center gap-6">
+            {/* First 3 categories in a grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 w-full max-w-4xl">
+              {categories.length > 0 ? (
+                categories.slice(0, 3).map((category, index) => (
+                  <CategoryCard
+                    key={category.mcat_id}
+                    title={category.mcat_name}
+                    bgColor={getBgColor(index)}
+                    imageUrl=""
+                    href={`/categories/${encodeURIComponent(category.mcat_id)}`}
+                    productCount={category.product_count}
+                  />
+                ))
+              ) : (
+                // Fallback static categories while loading
+                <>
+                  <CategoryCard
+                    title="Industrial Equipment"
+                    bgColor="from-slate-600 to-slate-800"
+                    imageUrl="/category-industrial.svg"
+                    href="/categories/industrial"
+                  />
+                  <CategoryCard
+                    title="Raw Materials"
+                    bgColor="from-amber-500 to-orange-600"
+                    imageUrl="/category-materials.svg"
+                    href="/categories/raw-materials"
+                  />
+                  <CategoryCard
+                    title="Electronics"
+                    bgColor="from-blue-600 to-indigo-700"
+                    imageUrl="/category-electronics.svg"
+                    href="/categories/electronics"
+                  />
+                </>
+              )}
+            </div>
+
+            {/* Dropdown for remaining categories */}
+            {categories.length > 3 && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    className="bg-white hover:bg-slate-50 border-2 border-slate-200 hover:border-indigo-300 rounded-xl px-6 py-3 h-auto text-slate-700 hover:text-indigo-600 font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
+                  >
+                    <span className="mr-2">More Categories</span>
+                    <span className="bg-indigo-100 text-indigo-700 px-2 py-1 rounded-full text-sm font-bold mr-2">
+                      +{categories.length - 3}
+                    </span>
+                    <ChevronDown className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent 
+                  align="center" 
+                  className="w-80 max-h-96 overflow-y-auto bg-white border-2 border-slate-200 rounded-xl shadow-xl p-2"
+                >
+                  <div className="grid grid-cols-1 gap-1">
+                    {categories.slice(3).map((category) => (
+                      <DropdownMenuItem key={category.mcat_id} asChild className="p-0 focus:bg-slate-50 rounded-lg">
+                        <Link 
+                          href={`/categories/${encodeURIComponent(category.mcat_id)}`}
+                          className="flex items-center justify-between p-3 hover:bg-slate-50 rounded-lg transition-colors w-full"
+                        >
+                          <div className="flex flex-col">
+                            <span className="font-semibold text-slate-900 text-sm">{category.mcat_name}</span>
+                            <span className="text-xs text-slate-500">{category.product_count.toLocaleString()} products</span>
+                          </div>
+                          <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-cyan-500 rounded-lg flex items-center justify-center">
+                            <span className="text-white font-bold text-sm">
+                              {category.mcat_name.charAt(0).toUpperCase()}
+                            </span>
+                          </div>
+                        </Link>
+                      </DropdownMenuItem>
+                    ))}
+                  </div>
+                  <div className="mt-2 pt-2 border-t border-slate-200">
+                    <DropdownMenuItem asChild className="p-0 focus:bg-slate-50 rounded-lg">
+                      <Link 
+                        href="/categories"
+                        className="flex items-center justify-center p-3 text-indigo-600 hover:text-indigo-700 font-semibold text-sm hover:bg-indigo-50 rounded-lg transition-colors w-full"
+                      >
+                        View All Categories
+                      </Link>
+                    </DropdownMenuItem>
+                  </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+
+            {/* Fallback dropdown for static categories */}
+            {categories.length === 0 && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    className="bg-white hover:bg-slate-50 border-2 border-slate-200 hover:border-indigo-300 rounded-xl px-6 py-3 h-auto text-slate-700 hover:text-indigo-600 font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
+                  >
+                    <span className="mr-2">More Categories</span>
+                    <span className="bg-indigo-100 text-indigo-700 px-2 py-1 rounded-full text-sm font-bold mr-2">
+                      +2
+                    </span>
+                    <ChevronDown className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent 
+                  align="center" 
+                  className="w-80 bg-white border-2 border-slate-200 rounded-xl shadow-xl p-2"
+                >
+                  <div className="grid grid-cols-1 gap-1">
+                    <DropdownMenuItem asChild className="p-0 focus:bg-slate-50 rounded-lg">
+                      <Link 
+                        href="/categories/office"
+                        className="flex items-center justify-between p-3 hover:bg-slate-50 rounded-lg transition-colors w-full"
+                      >
+                        <div className="flex flex-col">
+                          <span className="font-semibold text-slate-900 text-sm">Office Supplies</span>
+                          <span className="text-xs text-slate-500">Explore products</span>
+                        </div>
+                        <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center">
+                          <span className="text-white font-bold text-sm">O</span>
+                        </div>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild className="p-0 focus:bg-slate-50 rounded-lg">
+                      <Link 
+                        href="/categories/chemicals"
+                        className="flex items-center justify-between p-3 hover:bg-slate-50 rounded-lg transition-colors w-full"
+                      >
+                        <div className="flex flex-col">
+                          <span className="font-semibold text-slate-900 text-sm">Chemicals</span>
+                          <span className="text-xs text-slate-500">Explore products</span>
+                        </div>
+                        <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-violet-700 rounded-lg flex items-center justify-center">
+                          <span className="text-white font-bold text-sm">C</span>
+                        </div>
+                      </Link>
+                    </DropdownMenuItem>
+                  </div>
+                  <div className="mt-2 pt-2 border-t border-slate-200">
+                    <DropdownMenuItem asChild className="p-0 focus:bg-slate-50 rounded-lg">
+                      <Link 
+                        href="/categories"
+                        className="flex items-center justify-center p-3 text-indigo-600 hover:text-indigo-700 font-semibold text-sm hover:bg-indigo-50 rounded-lg transition-colors w-full"
+                      >
+                        View All Categories
+                      </Link>
+                    </DropdownMenuItem>
+                  </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
           </div>
         </div>
@@ -270,9 +383,58 @@ export default function Home() {
   );
 }
 
+// Function to get default image based on category name
+const getDefaultCategoryImage = (categoryName: string): string => {
+  const name = categoryName.toLowerCase();
+  
+  // Map category names to available images
+  if (name.includes('chemical') || name.includes('pharmaceutical')) {
+    return '/category-chemicals.svg';
+  }
+  if (name.includes('electronic') || name.includes('electrical') || name.includes('computer') || name.includes('software')) {
+    return '/category-electronics.svg';
+  }
+  if (name.includes('industrial') || name.includes('machinery') || name.includes('equipment') || name.includes('tool')) {
+    return '/category-industrial.svg';
+  }
+  if (name.includes('material') || name.includes('steel') || name.includes('metal') || name.includes('construction')) {
+    return '/category-materials.svg';
+  }
+  if (name.includes('office') || name.includes('stationery') || name.includes('furniture')) {
+    return '/category-office.svg';
+  }
+  
+  // Default fallback image
+  return '/category-industrial.svg';
+};
+
+// Function to get background color based on category name
+const getCategoryBgColor = (categoryName: string): string => {
+  const name = categoryName.toLowerCase();
+  
+  if (name.includes('chemical') || name.includes('pharmaceutical')) {
+    return 'from-purple-600 to-violet-700';
+  }
+  if (name.includes('electronic') || name.includes('electrical') || name.includes('computer') || name.includes('software')) {
+    return 'from-blue-600 to-indigo-700';
+  }
+  if (name.includes('industrial') || name.includes('machinery') || name.includes('equipment') || name.includes('tool')) {
+    return 'from-slate-600 to-slate-800';
+  }
+  if (name.includes('material') || name.includes('steel') || name.includes('metal') || name.includes('construction')) {
+    return 'from-amber-500 to-orange-600';
+  }
+  if (name.includes('office') || name.includes('stationery') || name.includes('furniture')) {
+    return 'from-emerald-500 to-teal-600';
+  }
+  
+  // Default fallback color
+  return 'from-slate-600 to-slate-800';
+};
+
 function CategoryCard({ 
   title, 
-  // bgColor, // Unused parameter, removed to avoid warning
+  bgColor, 
   imageUrl, 
   href,
   productCount 
@@ -283,15 +445,65 @@ function CategoryCard({
   href: string;
   productCount?: number;
 }) {
+  const [imageError, setImageError] = useState(false);
+  const [imageLoading, setImageLoading] = useState(true);
+  
+  // Get default image and background color based on category name
+  const defaultImage = getDefaultCategoryImage(title);
+  const categoryBgColor = getCategoryBgColor(title);
+  
+  const handleImageError = () => {
+    setImageError(true);
+    setImageLoading(false);
+  };
+  
+  const handleImageLoad = () => {
+    setImageLoading(false);
+  };
+
   return (
     <Link href={href} className="group block">
       <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group-hover:scale-105 border border-slate-200 h-full">
         <div className="h-32 sm:h-40 relative overflow-hidden">
-          <img 
-            src={imageUrl} 
-            alt={title}
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-          />
+          {!imageError ? (
+            <>
+              {/* Loading state */}
+              {imageLoading && (
+                <div className={`absolute inset-0 bg-gradient-to-br ${categoryBgColor} flex items-center justify-center`}>
+                  <div className="text-white text-4xl font-bold opacity-20">
+                    {title.charAt(0).toUpperCase()}
+                  </div>
+                </div>
+              )}
+              {/* Actual image */}
+              <img 
+                src={imageUrl || defaultImage} 
+                alt={title}
+                className={`w-full h-full object-cover group-hover:scale-110 transition-transform duration-300 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
+                onError={handleImageError}
+                onLoad={handleImageLoad}
+              />
+            </>
+          ) : (
+            /* Fallback gradient background with icon */
+            <div className={`w-full h-full bg-gradient-to-br ${categoryBgColor} flex items-center justify-center relative`}>
+              {/* Try to load default image as backup */}
+              <img 
+                src={defaultImage} 
+                alt={title}
+                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300 opacity-80"
+                onError={() => {
+                  // If default image also fails, show gradient with letter
+                }}
+              />
+              {/* Fallback letter overlay */}
+              <div className="absolute inset-0 bg-gradient-to-br from-black/20 to-black/40 flex items-center justify-center">
+                <div className="text-white text-4xl sm:text-5xl font-bold opacity-60">
+                  {title.charAt(0).toUpperCase()}
+                </div>
+              </div>
+            </div>
+          )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent group-hover:from-black/20 transition-all duration-300"></div>
         </div>
         <div className="p-4 sm:p-6">

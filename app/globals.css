@@ -33,3 +33,12 @@ html {
   outline: 2px solid #6366f1;
   outline-offset: 2px;
 }
+
+/* Hide Clerk footer elements */
+.clerk-hide-footer .cl-footer,
+.clerk-hide-footer .cl-footerAction,
+.clerk-hide-footer .cl-footerActionLink,
+.clerk-hide-footer .cl-footerActionText,
+.clerk-hide-footer .cl-footerPages {
+  display: none !important;
+}

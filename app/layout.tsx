@@ -26,7 +26,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
+    <ClerkProvider
+      signInUrl="/sign-in"
+      signUpUrl="/sign-up"
+      afterSignInUrl="/user"
+      afterSignUpUrl="/user"
+    >
       <html lang="en">
         <body className="min-h-screen flex flex-col">
           <ThemeProvider

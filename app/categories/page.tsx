@@ -1,9 +1,16 @@
 'use client';
 
 import Link from "next/link";
-import { ArrowRight, TrendingUp, Loader2, Package } from "lucide-react";
+import { ArrowRight, TrendingUp, Loader2, Package, ChevronDown } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getCategories, getTrendingCategories, type Category } from "@/lib/api/categories";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -86,10 +93,95 @@ export default function CategoriesPage() {
             <p className="text-slate-500">Categories will appear here once products are added to the database.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {categories.map((category, index) => (
-              <CategoryCard key={category.mcat_id} category={category} index={index} />
-            ))}
+          <div className="flex flex-col items-center gap-8">
+            {/* First 3 categories in a grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full max-w-6xl">
+              {categories.slice(0, 3).map((category, index) => (
+                <CategoryCard key={category.mcat_id} category={category} index={index} />
+              ))}
+            </div>
+
+            {/* Dropdown for remaining categories */}
+            {categories.length > 3 && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    className="bg-white hover:bg-slate-50 border-2 border-slate-200 hover:border-indigo-300 rounded-xl px-8 py-4 h-auto text-slate-700 hover:text-indigo-600 font-semibold transition-all duration-200 shadow-lg hover:shadow-xl"
+                  >
+                    <span className="mr-3 text-lg">More Categories</span>
+                    <span className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-sm font-bold mr-3">
+                      +{categories.length - 3}
+                    </span>
+                    <ChevronDown className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent 
+                  align="center" 
+                  className="w-80 sm:w-96 max-h-96 overflow-y-auto bg-white border-2 border-slate-200 rounded-xl shadow-2xl p-2 sm:p-3"
+                >
+                  <div className="grid grid-cols-1 gap-1 sm:gap-2">
+                    {categories.slice(3).map((category, index) => {
+                      // Generate different background colors for variety (continuing from index 3)
+                      const bgColors = [
+                        "from-slate-600 to-slate-800",
+                        "from-amber-500 to-orange-600", 
+                        "from-blue-600 to-indigo-700",
+                        "from-purple-600 to-violet-700",
+                        "from-emerald-500 to-teal-600",
+                        "from-pink-500 to-rose-600"
+                      ];
+                      const bgColor = bgColors[(index + 3) % bgColors.length];
+                      
+                      return (
+                        <DropdownMenuItem key={category.mcat_id} asChild className="p-0 focus:bg-slate-50 rounded-lg">
+                          <Link 
+                            href={`/categories/${encodeURIComponent(category.mcat_id)}`}
+                            className="flex items-center justify-between p-3 sm:p-4 hover:bg-slate-50 rounded-lg transition-colors w-full group"
+                          >
+                            <div className="flex flex-col flex-1 min-w-0">
+                              <span className="font-semibold text-slate-900 text-sm sm:text-base group-hover:text-indigo-600 transition-colors truncate">
+                                {category.mcat_name}
+                              </span>
+                              {/* Hide detailed text on mobile, show only product count */}
+                              <span className="text-xs sm:text-sm text-slate-500 mt-1 sm:hidden">
+                                {category.product_count.toLocaleString()} products
+                              </span>
+                              {/* Show full text on larger screens */}
+                              <span className="hidden sm:block text-sm text-slate-500 mt-1">
+                                Explore {category.product_count.toLocaleString()} products
+                              </span>
+                              {/* Hide stats on mobile, show on larger screens */}
+                              <div className="hidden sm:flex items-center gap-4 mt-2">
+                                <div className="text-center">
+                                  <div className="text-sm font-bold text-indigo-600">{category.product_count.toLocaleString()}</div>
+                                  <div className="text-xs text-slate-500">Products</div>
+                                </div>
+                                <div className="text-center">
+                                  <div className="text-sm font-bold text-cyan-600">Active</div>
+                                  <div className="text-xs text-slate-500">Category</div>
+                                </div>
+                              </div>
+                            </div>
+                            <div className={`w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br ${bgColor} rounded-lg sm:rounded-xl flex items-center justify-center ml-3 sm:ml-4 group-hover:scale-105 transition-transform flex-shrink-0`}>
+                              <span className="text-white font-bold text-sm sm:text-lg">
+                                {category.mcat_name.charAt(0).toUpperCase()}
+                              </span>
+                            </div>
+                          </Link>
+                        </DropdownMenuItem>
+                      );
+                    })}
+                  </div>
+                  {/* Hide total count on mobile, show on larger screens */}
+                  <div className="hidden sm:block mt-3 pt-3 border-t border-slate-200">
+                    <div className="text-center text-slate-500 text-sm">
+                      Showing {categories.length} total categories
+                    </div>
+                  </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
         )}
       </div>
