@@ -2,7 +2,7 @@
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Sparkles, MapPin, Star, Mic, Loader2, Package } from "lucide-react";
+import { Search, Sparkles, MapPin, Star, Mic, Loader2, Package, Camera } from "lucide-react";
 import { useState, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -91,7 +91,7 @@ function SearchPageContent() {
       <div className="bg-gradient-to-r from-indigo-50 via-white to-cyan-50 py-12 sm:py-16 border-b border-slate-200">
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center mb-6 sm:mb-8">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 mb-4">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-slate-900 mb-4 tracking-tight">
               AI-Powered <span className="bg-gradient-to-r from-indigo-600 to-cyan-600 bg-clip-text text-transparent">Search</span>
             </h1>
             <p className="text-lg sm:text-xl text-slate-600 max-w-2xl mx-auto px-4">
@@ -122,18 +122,27 @@ function SearchPageContent() {
                         type="text" 
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="What are you looking for?" 
-                        className="h-14 text-base border-0 bg-slate-50/50 focus:bg-white rounded-2xl focus:ring-2 focus:ring-indigo-500 px-6 pr-16 placeholder:text-slate-400 transition-all"
+                        placeholder="Search products, suppliers, categories..." 
+                        className="h-14 text-base border-0 bg-slate-50/50 focus:bg-white rounded-2xl focus:ring-2 focus:ring-indigo-500 px-6 pr-24 placeholder:text-slate-400 transition-all"
                       />
                       
-                      {/* Voice Search Button - Mobile */}
-                      <button 
-                        type="button"
-                        className="absolute right-4 top-1/2 -translate-y-1/2 p-2 hover:bg-slate-100 rounded-full transition-all duration-200 group/mic"
-                        title="Voice Search"
-                      >
-                        <Mic className="h-5 w-5 text-slate-400 group-hover/mic:text-indigo-600 transition-colors" />
-                      </button>
+                      {/* Mobile Action Icons */}
+                      <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                        <button 
+                          type="button"
+                          className="p-2 hover:bg-slate-200 rounded-full transition-all duration-200 group/camera"
+                          title="Search by Image"
+                        >
+                          <Camera className="h-4 w-4 text-slate-500 group-hover/camera:text-indigo-600 transition-all" />
+                        </button>
+                        <button 
+                          type="button"
+                          className="p-2 hover:bg-slate-200 rounded-full transition-all duration-200 group/mic"
+                          title="Voice Search"
+                        >
+                          <Mic className="h-4 w-4 text-slate-500 group-hover/mic:text-indigo-600 transition-all" />
+                        </button>
+                      </div>
                     </div>
                     
                     {/* Search Button - Mobile */}
@@ -167,18 +176,27 @@ function SearchPageContent() {
                         type="text" 
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Describe what you need... AI will find perfect matches" 
-                        className="h-14 lg:h-16 text-base lg:text-lg border-0 bg-transparent focus:ring-0 focus:outline-none px-6 pr-16 placeholder:text-slate-400"
+                        placeholder="Search products, suppliers, categories..." 
+                        className="h-14 lg:h-16 text-base lg:text-lg border-0 bg-transparent focus:ring-0 focus:outline-none px-6 pr-24 placeholder:text-slate-400"
                       />
                       
-                      {/* Voice Search Button - Desktop */}
-                      <button 
-                        type="button"
-                        className="absolute right-4 top-1/2 -translate-y-1/2 p-2 hover:bg-slate-100 rounded-full transition-all duration-200 group/mic"
-                        title="Voice Search"
-                      >
-                        <Mic className="h-5 w-5 text-slate-400 group-hover/mic:text-indigo-600 group-hover/mic:scale-110 transition-all" />
-                      </button>
+                      {/* Desktop Action Icons */}
+                      <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                        <button 
+                          type="button"
+                          className="p-2 hover:bg-slate-100 rounded-full transition-all duration-200 group/camera"
+                          title="Search by Image"
+                        >
+                          <Camera className="h-5 w-5 text-slate-400 group-hover/camera:text-indigo-600 group-hover/camera:scale-110 transition-all" />
+                        </button>
+                        <button 
+                          type="button"
+                          className="p-2 hover:bg-slate-100 rounded-full transition-all duration-200 group/mic"
+                          title="Voice Search"
+                        >
+                          <Mic className="h-5 w-5 text-slate-400 group-hover/mic:text-indigo-600 group-hover/mic:scale-110 transition-all" />
+                        </button>
+                      </div>
                     </div>
                     
                     {/* Search Button - Desktop */}
