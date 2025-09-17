@@ -2,8 +2,9 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Filter, Star, MapPin, Building, Package, ArrowLeft, Loader2, ShoppingCart, ChevronDown } from "lucide-react";
-import { useEffect, useState, useCallback } from "react";
+import { Search, Filter, Star, MapPin, Building, Package, ArrowLeft, Loader2, ShoppingCart, ChevronDown, Sparkles, Mic } from "lucide-react";
+import { useEffect, useState, useCallback, useRef } from "react";
+import type { CSSProperties } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { getProductsByCategory, searchProducts } from "@/lib/api/categories";
@@ -25,6 +26,57 @@ export default function CategoryDetailPage() {
   const [sortBy, setSortBy] = useState('created_at');
   const [showFilters, setShowFilters] = useState(false);
   // const [priceFilter, setPriceFilter] = useState(''); // Unused state
+
+  // Animation state to move header search bar to bottom
+  const [hasSearched, setHasSearched] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [ghostStyle, setGhostStyle] = useState<CSSProperties | null>(null);
+  const headerBarRef = useRef<HTMLDivElement | null>(null);
+  const resultsRef = useRef<HTMLDivElement | null>(null);
+  const bottomInputRef = useRef<HTMLInputElement | null>(null);
+
+  // Start header -> bottom transition (used on first type or submit)
+  const startBarTransition = useCallback(() => {
+    try {
+      const el = headerBarRef.current;
+      if (!el || hasSearched) return;
+
+      const rect = el.getBoundingClientRect();
+      const height = rect.height;
+      const initial: CSSProperties = {
+        position: 'fixed',
+        left: rect.left,
+        top: rect.top,
+        width: rect.width,
+        height,
+        zIndex: 60,
+        transition: 'transform 320ms ease-out, opacity 320ms ease-out',
+        transform: 'translate3d(0,0,0)',
+        opacity: 1,
+      };
+      setGhostStyle(initial);
+      setIsAnimating(true);
+
+      const targetTop = window.innerHeight - height - 16;
+      requestAnimationFrame(() => {
+        setGhostStyle((s) => s ? {
+          ...s,
+          transform: `translate3d(0px, ${targetTop - rect.top}px, 0)`,
+          opacity: 0.98,
+        } : null);
+      });
+
+      window.setTimeout(() => {
+        setIsAnimating(false);
+        setGhostStyle(null);
+        setHasSearched(true);
+        // Re-focus bottom input without scrolling
+        bottomInputRef.current?.focus({ preventScroll: true });
+      }, 320);
+
+      // Do not scroll during the transition to avoid input blur on mobile
+    } catch {}
+  }, [hasSearched]);
 
   const loadProducts = useCallback(async (page = 1, search = '') => {
     setLoading(true);
@@ -63,10 +115,26 @@ export default function CategoryDetailPage() {
     loadProducts(currentPage, searchQuery);
   }, [categoryId, currentPage, searchQuery, loadProducts]);
 
+  // On open: show bottom search bar and focus product list area (good for mobile)
+  useEffect(() => {
+    setHasSearched(true);
+    // Smoothly bring products into view after first paint
+    const id = window.setTimeout(() => {
+      const y = resultsRef.current?.offsetTop ?? 0;
+      window.scrollTo({ top: Math.max(0, y - 12), behavior: 'smooth' });
+    }, 80);
+    return () => window.clearTimeout(id);
+  }, [categoryId]);
+
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     setCurrentPage(1);
-    await loadProducts(1, searchQuery);
+
+    // Ensure the transition is started if not already
+    startBarTransition();
+
+    // Run search concurrently; do not block animation
+    void loadProducts(1, searchQuery);
   };
 
   const handlePageChange = (newPage: number) => {
@@ -105,32 +173,55 @@ export default function CategoryDetailPage() {
             )}
           </div>
 
-          {/* Search Bar */}
-          <form onSubmit={handleSearch} className="max-w-2xl mx-auto">
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
-              <Input 
-                type="text" 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={`Search in ${categoryName || 'this category'}...`}
-                className="h-14 pl-12 pr-16 text-lg border-2 border-slate-200 focus:border-indigo-500 rounded-xl"
-              />
-              <Button 
-                type="submit" 
-                disabled={loading}
-                size="sm"
-                className="absolute right-2 top-2 h-10 w-10 bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-700 hover:to-cyan-700 p-0"
-              >
-                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
-              </Button>
-            </div>
-          </form>
+          {/* Search Bar - only show in header until first search */}
+          {!hasSearched && (
+            <form onSubmit={handleSearch} className="max-w-2xl mx-auto">
+              <div ref={headerBarRef} className={`relative ${isAnimating ? 'opacity-0' : ''}`}>
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
+                <Input 
+                  type="text" 
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    if (e.target.value.trim().length === 1) {
+                      // Start the transition as soon as user begins typing
+                      startBarTransition();
+                    }
+                  }}
+                  placeholder={`Search in ${categoryName || 'this category'}...`}
+                  className="h-14 pl-12 pr-16 text-lg border-2 border-slate-200 focus:border-indigo-500 rounded-xl"
+                  autoComplete="off"
+                  inputMode="search"
+                  onBlur={(evt) => {
+                    // If animation is in progress, immediately re-focus to avoid losing focus
+                    if (isAnimating) {
+                      evt.preventDefault();
+                      (evt.target as HTMLInputElement).focus({ preventScroll: true });
+                    }
+                  }}
+                  onKeyDown={(e) => {
+                    // Prevent Enter from submitting and losing focus during animation
+                    if (isAnimating && e.key === 'Enter') {
+                      e.preventDefault();
+                    }
+                  }}
+                />
+                <Button 
+                  type="submit" 
+                  disabled={loading}
+                  size="sm"
+                  className="absolute right-2 top-2 h-10 w-10 bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-700 hover:to-cyan-700 p-0"
+                >
+                  {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+                </Button>
+              </div>
+            </form>
+          )}
         </div>
       </div>
 
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div ref={resultsRef} className={`max-w-7xl mx-auto px-4 py-8 ${hasSearched ? 'pb-48 sm:pb-40' : ''}`}>
         {/* Mobile Filter Button & Desktop Filters */}
         <div className="mb-6">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -196,7 +287,8 @@ export default function CategoryDetailPage() {
             </div>
           </div>
 
-          {/* Desktop Filter Sidebar - Hidden on Mobile */}
+          {/* Desktop Filter Sidebar + Grid - render only when products exist */}
+          {products.length > 0 && (
           <div className="hidden sm:flex gap-8 mt-8">
             <div className="w-64 flex-shrink-0">
               <div className="bg-white rounded-xl shadow-lg p-6 sticky top-24">
@@ -244,6 +336,7 @@ export default function CategoryDetailPage() {
               </div>
             </div>
           </div>
+          )}
         </div>
 
         {/* Error Handling - Shared for both mobile and desktop */}
@@ -268,7 +361,7 @@ export default function CategoryDetailPage() {
             <span className="ml-2 text-slate-600">Loading products...</span>
           </div>
         ) : products.length === 0 ? (
-          <div className="text-center py-12">
+          <div className="text-center py-8 sm:py-12">
             <Package className="h-16 w-16 text-slate-300 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-slate-600 mb-2">No products found</h3>
             <p className="text-slate-500">
@@ -341,6 +434,80 @@ export default function CategoryDetailPage() {
             </div>
           </div>
         )}
+      </div>
+
+      {/* Ghost clone for fly-down animation */}
+      {isAnimating && ghostStyle && (
+        <div style={ghostStyle} className="pointer-events-none">
+          <div className="max-w-2xl mx-auto">
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
+              <Input 
+                type="text" 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder={`Search in ${categoryName || 'this category'}...`}
+                className="h-14 pl-12 pr-16 text-lg border-2 border-slate-200 rounded-xl"
+              />
+              <Button 
+                type="button" 
+                disabled
+                size="sm"
+                className="absolute right-2 top-2 h-10 w-10 bg-gradient-to-r from-indigo-600 to-cyan-600 p-0"
+              >
+                <Search className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bottom sticky compact search bar */}
+      <div
+        className={`fixed bottom-0 left-0 right-0 bg-transparent z-40 transform transition-transform duration-300 ease-out will-change-transform ${
+          hasSearched && !isAnimating ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0 pointer-events-none'
+        }`}
+      >
+        <div className="max-w-7xl mx-auto px-4 py-3">
+          <form onSubmit={handleSearch} className="relative group">
+            <div className="absolute -inset-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-500 rounded-3xl blur opacity-30 group-hover:opacity-50 transition duration-1000"></div>
+            <div className="relative">
+              <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-2 flex items-center gap-2">
+                {/* AI Badge */}
+                <div className="flex items-center gap-2 bg-gradient-to-r from-indigo-100 to-cyan-100 px-4 py-2 rounded-full">
+                  <Sparkles className="h-4 w-4 text-indigo-600" />
+                  <span className="text-xs font-bold text-indigo-700">AI</span>
+                </div>
+                {/* Input */}
+                <div className="relative flex-1 min-w-0">
+                  <Input 
+                    type="text" 
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder={`Search in ${categoryName || 'this category'}...`}
+                    className="h-12 text-base border-0 bg-slate-50/50 focus:bg-white rounded-2xl focus:ring-2 focus:ring-indigo-500 pl-10 pr-24"
+                    ref={bottomInputRef}
+                  />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  {/* Right inline actions to mimic search page */}
+                  <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                    <button type="button" className="p-2 hover:bg-slate-200 rounded-full transition-all duration-200" title="Voice Search">
+                      <Mic className="h-4 w-4 text-slate-500" />
+                    </button>
+                  </div>
+                </div>
+                {/* Submit Button */}
+                <Button 
+                  type="submit" 
+                  size="sm"
+                  className="h-12 px-6 bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-700 hover:to-cyan-700 rounded-2xl text-sm font-semibold shadow-lg hover:shadow-xl"
+                >
+                  <Search className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );
